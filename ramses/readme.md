@@ -1,0 +1,1 @@
+Esse repositório contém os códigos dos programas desenvolvidos para as máquinas hipotéticas da Arquitetura de Computadores I.
