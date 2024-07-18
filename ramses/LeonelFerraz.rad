@@ -1,0 +1,114 @@
+;Leonel Ferraz Hernandez - 00585121 - Trabalho RAMSES, 2024/1 - Professor Sergio Cechin
+
+;DEFINIÇÃO DAS VARIÁVEIS REQUISITADAS PELO PROGRAMA
+	ORG 208
+TROCAS: DB 0
+XSUM: DB 0
+VCHAR: DB 0
+VBITS: DB 0
+;====================================================
+
+;VARIÁVEIS TEMPORÁRIAS PARA AS MANIPULAÇÕES DE DADOS
+	ORG 204
+TEMPVCHAR: DB 0
+TEMPVBITS: DB 0
+CONTADOR: DB 8
+;====================================================
+
+;PROGRAMA PRINCIPAL
+inicio:
+	ORG 0	;Começando a organização do código a partir do endereço 0
+LDR A, #0	;Atribui o valor 0 ao registrador A para poder zerar posteriormente as variáveis outrora definidas
+STR A, TROCAS	;Zera a variável TROCAS
+STR A, XSUM	;Zera a variável XSUM
+LDR A, VCHAR	;Carrega o VCHAR para o registrador A, vamos colocar ele na variável temporária para operar com ela
+STR A, TEMPVCHAR	;Acionamento da variável temporária TEMPVCHAR
+LDR B, VBITS	;Carrega o VBITS para o registrador B, vamos colocar ele na variável temporária para operar com ela
+STR B, TEMPVBITS	;Acionamento da variável temporária TEMPVBITS
+
+mainloop:
+LDR A,TEMPVCHAR,I	;Carrega o TEMPVCHAR atual
+SUB A, #65	;Diminui 65 para fazer a verificação de letra com a tabela ASCII
+JN notletra	;Condicional de negativo caso a subtração tenha dado negativo
+SUB A, #26	;Diminui 26 para fazer a verificação de letra maíscula com a tabela ASCII
+JN letramaiuscula	;Condicional para caso a subtração acima tenha dado negativo
+SUB A, #6	;Diminui 6 para verificar se não é algum símbolo
+JN notletra	;Condicional de not-letra baseado no resultado acima
+SUB A, #26	;Diminui 26 para verificar se é uma letra minúscula com a tabela ASCII
+JN letraminuscula	;Condicional para caso a subtração acima seja true
+
+;TRATAMENTO DADO CASO O VCHAR EM QUESTÃO NÃO SEJA UMA LETRA NEM MINÚSCULA NEM MAÍSCULA
+notletra:
+LDR B,TEMPVBITS,I
+SHR B		;Garantindo que os bits vão avançar individualmente a cada iteração, acompanhando o resto
+STR B,TEMPVBITS,I
+;AVANÇANDO OS CARACTERES ATUAIS DO TEMPVCHAR E IMPLEMENTANDO O CONTADOR
+progressao:
+LDR A,TEMPVCHAR,I	;Carrega o TEMPVCHAR atual
+ADD A,XSUM	;Soma o XSUM no conteúdo atual do registrador A
+STR A,XSUM	;Guarda o novo valor de XSUM 
+LDR A, TEMPVCHAR	;Carregando o VCHAR que contém o caractere atual
+ADD A, #1	;Somando 1 a esse caractere para avançar ao próximo
+STR A, TEMPVCHAR	;Guardando no VCHAR esse caractere +1
+LDR X, CONTADOR ;Carrega o contador no registrador de índice
+SUB X, #1	;Diminui 1 do contador que continha inicialmente 8
+STR X, CONTADOR	;Guarda o novo valor do contador
+JZ resetcontadorandnextbyte ;Condição para quando o contador chegar a 0 (Varreu todo o VBITS)
+JMP mainloop 	;Retorno ao loop principal
+
+resetcontadorandnextbyte: 
+LDR X, #8	;Definindo o contador para 8 novamente para poder realizar mais um ciclo
+STR X, CONTADOR	;Guardando o contador resetado para 8
+LDR B, TEMPVBITS	;Carrega o TEMPVBITS atual
+ADD B, #1	;Avançando para o próximo VBIT
+STR B, TEMPVBITS	;Armazena a nova alteração do TEMPVBITS
+LDR A,TEMPVBITS	;Carrega o TEMPVBITS para o registrador A
+SUB A,VBITS	;Diminui o valor original do VBITS do TEMPVBITS
+SUB A,#2	;Verifica se os dois bytes do VBITS já foram percorridos
+JZ fim		;Condição de jump para caso o cálculo acima tenha sido satisfeito
+JMP mainloop	;Retorno ao loop principal
+
+;====================================================
+;ROTINA PARA CASO O VCHAR SEJA CLASSIFICADO COMO UMA LETRA MAÍSCULA
+letramaiuscula:
+LDR B,TEMPVBITS,I ;Carrega o TEMPVBITS atual
+SHR B	;Faz o shift-right para verificar se o bit atual é 0 ou 1
+STR B,TEMPVBITS,I ;Guarda o novo TEMPVBITS deslocado por causa do SHR
+JC progressao	;Condição de carry para o SHR, nesse caso não acontece nada, bit = 1, não converte
+JMP converteminusculo ;Condição para caso não der carry, isso significa que o bit é 0, e vai precisar converter
+;====================================================
+
+;ROTINA PARA CASO O VCHAR SEJA CLASSIFICADO COMO UMA LETRA MINÚSCULA
+letraminuscula:
+LDR B,TEMPVBITS,I	;Carrega o TEMPVBITS atual
+SHR B	;Faz o shift-right para verificar se o bit atual é 0 ou 1
+STR B,TEMPVBITS,I ;Guarda o novo TEMPVBITS deslocado por causa do SHR
+JC convertemaiusculo ;Condição de carry, nesse caso, caso o bit seja = 1, vai precisar converter
+JMP progressao;Condição de carry, nesse caso, caso o bit seja = 0, não deu carry, não precisa converter
+;====================================================
+
+;ROTINA PARA CONVERTER PARA MAISCULO
+convertemaiusculo:
+LDR A,TEMPVCHAR,I ;Carrega o caractere atual do TEMPVCHAR
+SUB A, #32	;Diminui 32 para transformar para maiúsculo
+STR A,TEMPVCHAR,I	;Guarda o novo caractere transformado
+LDR X, TROCAS	;Carrega a variável TROCAS para o registrador X
+ADD X, #1	;Adiciona 1, para demonstrar que uma troca foi efetuada
+STR X, TROCAS	;Guarda o novo valor de trocas
+JMP progressao	;Volta para o avanço de caracteres para testar o próximo
+
+;=====================================================
+;ROTINA PARA CONVERTER PARA MINUSCULO
+converteminusculo:;Vamos somar 32 para passar de maíscula para minúscula (TABELA ASCII)
+LDR A,TEMPVCHAR,I	;Carrega o VCHAR atual
+ADD A, #32	;Adiciona 32 para converter de maíscula para minuscula como requisitado
+STR A,TEMPVCHAR,I ;Guarda esse novo valor no TEMPVCHAR atual
+LDR X, TROCAS	;Carrega a variável TROCAS para o registrador X
+ADD X, #1	;Adiciona 1, para demonstrar que uma troca foi efetuada
+STR X, TROCAS	;Guarda o novo valor
+JMP progressao	;Volta para o avanço de caracteres para testar o próximo
+
+;=====================================
+;FIM DO PROGRAMA
+fim:
+HLT
