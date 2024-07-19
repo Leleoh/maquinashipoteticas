@@ -1,0 +1,26 @@
+Símbolo         Valor Decimal   Valor Hexadecimal
+-------         -------------   -----------------
+STACK                   65408                FF80
+IVET                    65470                FFBE
+TIMDT                   65495                FFD7
+INTS                    65496                FFD8
+INTE                    65497                FFD9
+TECST                   65498                FFDA
+TECDT                   65499                FFDB
+VISOR                   65500                FFDC
+LOOP_RELOGIO               32                  20
+LOOP_RESET                 44                  2C
+MAIN                       52                  34
+LOOP_MAIN                  58                  3A
+DSPDEC                    108                  6C
+DSPDEC_2                  110                  6E
+DSPDEC_1                  124                  7C
+RELOGIO                   139                  8B
+HORA                      139                  8B
+MINUTO                    141                  8D
+SEGUNDO                   143                  8F
+DECIMOS                   145                  91
+ISR                       147                  93
+ISR2                      179                  B3
+ISRTIM                    192                  C0
+ISRTIM_FIM                256                 100
