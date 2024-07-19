@@ -1,0 +1,65 @@
+;Leonel Ferraz Hernandez - 00585121 - Professor Sérgio Cechin
+;============================================================
+;				Referência para o desenvolvimento			
+;============================================================
+;	CESAR 2024.1
+;
+;	Áreas de memória:
+;	0000 - 7FFF		PROGRAMA
+;					Área reservada para as funções e o stack
+;	
+;	7F00			Fundo da pilha
+;
+;	7F00H - 7F01	Início da função de relógio
+;	
+;	7F02 - 7F03		Início da função leitura string
+;
+;	7F04 - 7F05		Início da função movimenta letras
+;
+;	7F06 - FF7F		Área livre (cuidar para deixar limpo)
+;
+;	FF80 - FFBF 	PERIFERICOS16
+;					Área dos periféricos
+;
+;	FFC0 - FFFF		PERIFERICOS8
+;					Área dos periféricos
+;
+;	8000 - FF7F		APP
+;					Posição onde o programa será colocado e as funções utilizadas
+;
+;===========================================================
+;				Atribuindo variáveis
+;===========================================================
+
+PROGRAMA:		equ H0000
+APP: 			equ H8000
+PERIFERICOS16:	equ HFF80
+PERIFERICOS8:	equ HFFC0
+
+;===========================================================
+;				Área reservada para os periféricos
+;===========================================================
+
+;Acesso em 16 bits
+	org		PERIFERICOS16
+STACK:
+	daw		[31]; Area reservada
+IVET:
+	dw 0		;Vetor de interrupção
+	
+;Acesso em 8 bits
+	org PERIFERICOS8
+	dab [23]
+TIMDT:	db		0		; Base de tempo do timer
+INTS:	db		0		; INTERRUPT STATUS: IP x x x . x x IPStec IPStim
+INTE:	db		0		; INTERRUPT ENABLE: IE x x x . x x IEStec IEStim
+TECST:	db		0		; Status do teclado
+TECDT:	db		0		; Dado do teclado
+VISOR:	dab		[36]	; Portas de acesso ao visor
+
+;============================================================
+;				Início do programa
+;============================================================
+org PROGRAMA
+
+
