@@ -32,9 +32,9 @@
 ;===========================================================
 
 PROGRAMA:		equ H0000
-APP: 			equ H8000 	;32768
-PERIFERICOS16:	equ HFF80	;65408
-PERIFERICOS8:	equ HFFC0	;65472
+APP: 			equ H8000
+PERIFERICOS16:	equ HFF80
+PERIFERICOS8:	equ HFFC0
 
 ;===========================================================
 ;Área reservada para os periféricos
@@ -43,7 +43,7 @@ PERIFERICOS8:	equ HFFC0	;65472
 ;Acesso em 16 bits
 		org		PERIFERICOS16
 STACK:
-		daw		[31]; Area reservada
+		daw		[31];Area reservada
 IVET: 	dw 0		;Vetor de interrupção
 	
 ;Acesso em 8 bits
@@ -69,26 +69,17 @@ VISOR:	dab		[36]	; Portas de acesso ao visor
 	mov #isr, IVET	;Rotina de interrupção
 	mov #100, TIMDT ;Interrupção 100ms
 
-;==========================================================
-; Início do Programa Principal
-	org		PROGRAMA
-
-;	Inicializa o processador e o hardware
+;Inicializa o processador e o hardware
 	mov		#STACK,r6
 	
-	clr		INTS			; Reset pedidos de interrupção
-	clr		TECST			; Reset estado do hardware do teclado
-	mov		#isr,IVET		; Set Interrupt Service Rotine
-	mov		#100,TIMDT		; Set timer para interromper a cada 100ms
-		
-;	Inicializa relógio
+;Inicializa relógio
 	mov		#4,r0
 	mov		#Relogio,r1
 loop_relogio:
 	clr		(r1)+
 	sob		r0,loop_relogio
 	
-;	Limpa o visor
+;Limpa o visor
 	mov		#36,r0
 	mov		#VISOR,r1
 loop_reset:
@@ -177,6 +168,10 @@ ISR2:
 
 	rti					; Return From Interrupt
 	
+
+;==========================================================================
+;	Tratamento das interrupções de timer
+;==========================================================================
 ISRtim:
 	inc		Decimos
 	cmp		Decimos,#10
@@ -200,4 +195,4 @@ ISRtim:
 
 ISRtim_Fim:
 	rts		r7
-
+	
