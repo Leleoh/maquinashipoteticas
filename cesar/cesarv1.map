@@ -1,5 +1,9 @@
 Símbolo         Valor Decimal   Valor Hexadecimal
 -------         -------------   -----------------
+PROGRAMA                    0                   0
+APP                     32768                8000
+PERIFERICOS16           65408                FF80
+PERIFERICOS8            65472                FFC0
 STACK                   65408                FF80
 IVET                    65470                FFBE
 TIMDT                   65495                FFD7
