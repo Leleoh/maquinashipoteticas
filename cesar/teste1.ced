@@ -69,7 +69,7 @@ VISOR:	dab		[36]	; Portas de acesso ao visor
 	mov #isr, IVET	;Rotina de interrupção
 	mov #100, TIMDT ;Interrupção 100ms
 
-;Inicializa o processador e o hardware
+;Inicializa o processador e o hardware !IMPORTANTE
 	mov		#STACK,r6
 	
 ;Inicializa relógio
