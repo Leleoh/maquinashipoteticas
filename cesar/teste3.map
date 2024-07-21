@@ -30,6 +30,7 @@ ISR2                      200                  C8
 ISRTIM                    213                  D5
 ISRTIM_FIM                277                 115
 ISRTEC                    278                 116
-INCREMENTA_MINUTOS        310                 136
-INCREMENTA_HORAS          326                 146
-ISRTEC_FIM                342                 156
+INCREMENTA_MINUTOS        322                 142
+INCREMENTA_HORAS          338                 152
+ZERA_HORAS                354                 162
+ISRTEC_FIM                366                 16E

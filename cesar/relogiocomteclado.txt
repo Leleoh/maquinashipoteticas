@@ -224,6 +224,10 @@ ISRtec:
 	beq incrementa_horas
 	cmp #'h', r0
 	beq	incrementa_horas
+	cmp #'Z', r0
+	beq zera_horas
+	cmp #'z', r0
+	beq zera_horas
 	
 	jmp ISRTEC_fim
 	
@@ -239,6 +243,11 @@ incrementa_horas:
 	cmp Hora, #24
 	blt ISRtec_fim
 	clr Hora
+	
+zera_horas:
+	clr Hora
+	clr Minuto
+	clr Segundo
 	
 ISRTEC_fim:
 	clr TECST

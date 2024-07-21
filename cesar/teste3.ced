@@ -215,8 +215,6 @@ ISRtim_Fim:
 ;Tratamento da interrupção do teclado
 ;=================================================
 ISRtec:
-	mov TECST, r1
-	cmp #1, r1
 	mov TECDT, r0
 	cmp #'M', r0
 	beq incrementa_minutos
@@ -226,6 +224,10 @@ ISRtec:
 	beq incrementa_horas
 	cmp #'h', r0
 	beq	incrementa_horas
+	cmp #'Z', r0
+	beq zera_horas
+	cmp #'z', r0
+	beq zera_horas
 	
 	jmp ISRTEC_fim
 	
@@ -234,11 +236,18 @@ incrementa_minutos:
 	inc Minuto
 	cmp Minuto, #60
 	blt ISRtec_fim
+	clr Minuto
 
 incrementa_horas:
 	inc Hora
 	cmp Hora, #24
 	blt ISRtec_fim
+	clr Hora
+	
+zera_horas:
+	clr Hora
+	clr Minuto
+	clr Segundo
 	
 ISRTEC_fim:
 	clr TECST
