@@ -1,34 +1,34 @@
-;Leonel Ferraz Hernandez - 00585121 - Professor S√©rgio Cechin
+;Leonel Ferraz Hernandez - 00585121 - Professor SÈrgio Cechin
 ;============================================================
-;Refer√™ncia para o desenvolvimento			
+;ReferÍncia para o desenvolvimento			
 ;============================================================
 ;	CESAR 2024.1
 ;
-;	√Åreas de mem√≥ria:
+;	¡reas de memÛria:
 ;	0000 - 7FFF		PROGRAMA
-;					√Årea reservada para as fun√ß√µes e o stack
+;					¡rea reservada para as funÁıes e o stack
 ;	
 ;	7F00			Fundo da pilha
 ;
-;	7F00H - 7F01	In√≠cio da fun√ß√£o de rel√≥gio
+;	7F00H - 7F01	InÌcio da funÁ„o de relÛgio
 ;	
-;	7F02 - 7F03		In√≠cio da fun√ß√£o leitura string
+;	7F02 - 7F03		InÌcio da funÁ„o leitura string
 ;
-;	7F04 - 7F05		In√≠cio da fun√ß√£o movimenta letras
+;	7F04 - 7F05		InÌcio da funÁ„o movimenta letras
 ;
-;	7F06 - FF7F		√Årea livre (cuidar para deixar limpo)
+;	7F06 - FF7F		¡rea livre (cuidar para deixar limpo)
 ;
 ;	FF80 - FFBF 	PERIFERICOS16
-;					√Årea dos perif√©ricos
+;					¡rea dos perifÈricos
 ;
 ;	FFC0 - FFFF		PERIFERICOS8
-;					√Årea dos perif√©ricos
+;					¡rea dos perifÈricos
 ;
 ;	8000 - FF7F		APP
-;					Posi√ß√£o onde o programa ser√° colocado e as fun√ß√µes utilizadas
+;					PosiÁ„o onde o programa ser· colocado e as funÁıes utilizadas
 ;
 ;===========================================================
-;Atribuindo vari√°veis
+;Atribuindo vari·veis
 ;===========================================================
 
 PROGRAMA:		equ H0000
@@ -36,22 +36,15 @@ APP: 			equ H8000
 PERIFERICOS16:	equ HFF80
 PERIFERICOS8:	equ HFFC0
 
-	org H7F00
-endereco1: 		dw programa1
-
-	org H8000
-MOV #0,R0
-JSR R7,(H7F00(R0)) ; Chama a fun√ß√£o de Rel√≥gio
-HLT
 ;===========================================================
-;√Årea reservada para os perif√©ricos
+;¡rea reservada para os perifÈricos
 ;===========================================================
 
 ;Acesso em 16 bits
 		org		PERIFERICOS16
 STACK:
 		daw		[31];Area reservada
-IVET: 	dw 0		;Vetor de interrup√ß√£o
+IVET: 	dw 0		;Vetor de interrupÁ„o
 	
 ;Acesso em 8 bits
 		org PERIFERICOS8
@@ -64,25 +57,22 @@ TECDT:	db		0		; Dado do teclado
 VISOR:	dab		[36]	; Portas de acesso ao visor
 
 ;============================================================
-;In√≠cio do programa principal
+;InÌcio do programa principal
 ;============================================================
 		org PROGRAMA
 		
-;1) Desabilitando o sistema de interrup√ß√µes
+;1) Desabilitando o sistema de interrupÁıes
 	CLR INTE
 	CLR INTS
 
-;2)Setando o timer para gerar interrup√ß√£o a cada "100ms"
-	
+;2)Setando o timer para gerar interrupÁ„o a cada "100ms"
+	mov #isr, IVET	;Rotina de interrupÁ„o
+	mov #100, TIMDT ;InterrupÁ„o 100ms
 
 ;Inicializa o processador e o hardware !IMPORTANTE
 	mov		#STACK,r6
-	jmp 	H8000
-	programa1:			
-		mov #isr, IVET	;Rotina de interrup√ß√£o
-		mov #100, TIMDT ;Interrup√ß√£o 100ms
 	
-;Inicializa rel√≥gio
+;Inicializa relÛgio
 	mov		#4,r0
 	mov		#Relogio,r1
 
@@ -104,14 +94,12 @@ loop_reset:
 		
 ;==========================================================================
 ;	Programa principal
-;	Respons√°vel por atualizar a informa√ß√£o do rel√≥gio no visor.
+;	Respons·vel por atualizar a informaÁ„o do relÛgio no visor.
 main:
-	mov		#h83,INTE
+	mov		#h81,INTE
 loop_main:
 
 	; Coloca o Relogio no visor
-	cmp		Saida, #1
-	beq		fim
 	mov		Hora,r0
 	mov		#VISOR,r1
 	jsr		r7,dspDec
@@ -130,13 +118,10 @@ loop_main:
 
 	br		loop_main
 
-fim:
-	rts r7
-	
 ;--------------------------------------------------------------------------
-;	Coloca um n√∫mero de 2 digitos no visor
+;	Coloca um n˙mero de 2 digitos no visor
 ;	r0 -> valor
-;	r1 -> posi√ß√£o no visor
+;	r1 -> posiÁ„o no visor
 ;	dspDec = Display Decimal
 dspDec:
 	clr		r2
@@ -155,34 +140,33 @@ dspDec_1:
 	rts		r7
 		
 ;--------------------------------------------------------------------------
-;	O rel√≥gio √© formado por 6 palavras, cada uma representando uma parte do rel√≥gio.
+;	O relÛgio È formado por 6 palavras, cada uma representando uma parte do relÛgio.
 Relogio:
 Hora:		dw	0
 Minuto:		dw	0
 Segundo:	dw	0
 Decimos:	dw	0
-Saida:		db 	0
 
 
 ;==========================================================================
-; Rotina de INTERRUP√á√ÉO
+; Rotina de INTERRUP«√O
 isr:
-	mov		r0,-(r6)	; Salva registradores (n√£o √© necess√°rio salvar o R5)
+	mov		r0,-(r6)	; Salva registradores (n„o È necess·rio salvar o R5)
 	mov		r1,-(r6)
 	mov		r2,-(r6)
 	mov		r3,-(r6)
 	mov		r4,-(r6)
 	mov		r5,-(r6)
 
-	;Interrup√ß√£o timer
-	mov		INTS,r0		; Verifica se √© INT do TIMER
+	;InterrupÁ„o timer
+	mov		INTS,r0		; Verifica se È INT do TIMER
 	and		#1,r0
 	beq		ISR2
 	jsr		r7,ISRtim	; Tratamento da INT do TIMER
 	and		#hFFFE,INTS	; Desliga bit de INT TIMER
 	
-	;Interrup√ß√£o teclado
-	mov INTS, r0		;Verifica se √© INT do teclado
+	;InterrupÁ„o teclado
+	mov INTS, r0		;Verifica se È INT do teclado
 	and #2, r0			;Compara r0 com 2
 	beq	ISR2
 	jsr r7, ISRtec		;Tratamento da int do teclado
@@ -201,7 +185,7 @@ ISR2:
 	
 
 ;==========================================================================
-;	Tratamento das interrup√ß√µes de timer
+;	Tratamento das interrupÁıes de timer
 ;==========================================================================
 ISRtim:
 	inc		Decimos
@@ -228,7 +212,7 @@ ISRtim_Fim:
 	rts		r7
 
 ;==================================================
-;Tratamento da interrup√ß√£o do teclado
+;Tratamento da interrupÁ„o do teclado
 ;=================================================
 ISRtec:
 	mov TECDT, r0
@@ -244,8 +228,9 @@ ISRtec:
 	beq zera_horas
 	cmp #'z', r0
 	beq zera_horas
-	cmp #6, r0		;CTRL-F
+	cmp #6, r0
 	beq fim_timer
+	
 	
 	jmp ISRTEC_fim
 	
@@ -272,22 +257,5 @@ ISRTEC_fim:
 	rts r7
 	
 fim_timer:
-	mov #1, Saida
-	jmp ISRTEC_fim
-	
-	
-	
-
-
-
-
-
-
-
-
-
-
-
-;=========================================
-;√Årea reservada para a segunda fun√ß√£o (Leitura de String de teclado com cursor piscante)
-;==========================================
+	HLT	
+	rts r7
