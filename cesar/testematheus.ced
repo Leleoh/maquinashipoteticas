@@ -36,6 +36,17 @@ APP: 			equ H8000
 PERIFERICOS16:	equ HFF80
 PERIFERICOS8:	equ HFFC0
 
+	org H7F00
+endereco1: 		dw programa1
+endereco2:		dw programa2	
+
+	org H8000
+MOV #0,R0
+JSR R7,(H7F00(R0)) ; Chama a função de Relógio
+MOV #2,R0 	; Chama a função de Leitura de String
+JSR R7,(H7F00(R0))
+
+HLT
 ;===========================================================
 ;Área reservada para os periféricos
 ;===========================================================
@@ -66,11 +77,14 @@ VISOR:	dab		[36]	; Portas de acesso ao visor
 	CLR INTS
 
 ;2)Setando o timer para gerar interrupção a cada "100ms"
-	mov #isr, IVET	;Rotina de interrupção
-	mov #100, TIMDT ;Interrupção 100ms
+	
 
 ;Inicializa o processador e o hardware !IMPORTANTE
 	mov		#STACK,r6
+	jmp 	H8000
+	programa1:			
+		mov #isr, IVET	;Rotina de interrupção
+		mov #100, TIMDT ;Interrupção 100ms
 	
 ;Inicializa relógio
 	mov		#4,r0
@@ -121,6 +135,21 @@ loop_main:
 	br		loop_main
 
 fim:
+	mov		#36,r0
+	mov		#VISOR,r1
+loop_reset_fim:
+	mov		#' ',(r1)
+	inc		r1
+	sob		r0,loop_reset_fim
+	clr INTE
+	clr INTS
+	clr TIMDT
+	clr r0
+	clr r1
+	clr r2
+	clr r3
+	clr r4
+	clr r5
 	rts r7
 	
 ;--------------------------------------------------------------------------
@@ -264,20 +293,90 @@ ISRTEC_fim:
 fim_timer:
 	mov #1, Saida
 	jmp ISRTEC_fim
-	
-	
-	
-
-
-
-
-
-
-
-
-
-
 
 ;=========================================
 ;Área reservada para a segunda função (Leitura de String de teclado com cursor piscante)
 ;==========================================
+programa2:
+;Resetando
+	clr		INTS			; Reset pedidos de interrupção
+	clr		TECST			; Reset estado do hardware do teclado
+	mov		#isrteclado,IVET		; Set Interrupt Service Rotine
+		
+;----------------------------------------------------------
+;	Limpa o visor
+	mov		#36,r0
+	mov		#VISOR,r1
+loop_reset_teclado:
+	mov		#' ',(r1)
+	inc		r1
+	sob		r0,loop_reset_teclado
+		
+;----------------------------------------------------------
+;	Atualiza as informações da Tecla no visor.
+main_teclado:
+	mov		#-1,Tecla2
+	mov		#VISOR,r0
+	mov		#h82,INTE
+loop_main_teclado:
+
+	; Pega informação de "Tecla".
+	; Se for >255, não há tecla;
+	; Se for <=255, Tecla contem a tecla digitada.
+	cmp		Tecla2,#255
+	bhi		loop_main_teclado
+	
+	mov		Tecla2,(r0)
+	mov		#-1,Tecla2
+	
+	inc		r0
+	tst		r0
+	bne		loop_main_teclado
+	
+	mov		#VISOR,r0
+	br		loop_main_teclado
+	
+;	O relógio é formado por 6 palavras, cada uma representando uma parte do relógio.
+Tecla2:		dw	0
+
+
+;==========================================================
+; Rotina de INTERRUPÇÃO
+; Só será chamada se as interrupções estiverem habilitadas
+isrteclado:
+	mov		r0,-(r6)	; Salva registradores (não é necessário salvar o R5)
+	mov		r1,-(r6)
+	mov		r2,-(r6)
+	mov		r3,-(r6)
+	mov		r4,-(r6)
+	mov		r5,-(r6)
+
+	mov		INTS,r0		; Verifica se é INT do TECLADO
+	and		#2,r0
+	beq		ISR2teclado
+	jsr		r7,ISRtec_teclado; Tratamento da INT do TECLADO
+	and		#hFFFD,INTS	; Desliga bit de INT TECLADO
+ISR2teclado:
+
+	mov		(r6)+,r5	; Retorna os registradores da pilha
+	mov		(r6)+,r4
+	mov		(r6)+,r3
+	mov		(r6)+,r2
+	mov		(r6)+,r1
+	mov		(r6)+,r0
+
+	rti					; Return From Interrupt
+	
+
+;----------------------------------------------------------
+;	Tratamento das interrupções de teclado
+;----------------------------------------------------------
+ISRtec_teclado:
+	cmp		Tecla2,#256
+	bls		ISRtec_1
+	mov		TECDT,Tecla2
+ISRtec_1:
+	clr		TECST
+
+ISRtec_Fim_teclado:
+	rts		r7
