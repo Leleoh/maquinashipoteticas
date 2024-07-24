@@ -294,14 +294,23 @@ fim_timer:
 	mov #1, Saida
 	jmp ISRTEC_fim
 
+
+
+
+
+
+
+
+
 ;=========================================
-;Área reservada para a segunda função (Leitura de String de teclado com cursor piscante)
+;SEGUNDA FUNÇÃO (Leitura de String de teclado com cursor piscante)
 ;==========================================
 programa2:
 ;Resetando
-	clr		INTS			; Reset pedidos de interrupção
-	clr		TECST			; Reset estado do hardware do teclado
-	mov		#isrteclado,IVET		; Set Interrupt Service Rotine
+	clr		INTS				; Reset pedidos de interrupção
+	clr		TECST				; Reset estado do hardware do teclado
+	mov		#isrteclado,IVET	; Set Interrupt Service Rotine
+	mov 	#250, TIMDT			;Tempo desejado do sinal, 250ms
 		
 ;----------------------------------------------------------
 ;	Limpa o visor
@@ -311,18 +320,19 @@ loop_reset_teclado:
 	mov		#' ',(r1)
 	inc		r1
 	sob		r0,loop_reset_teclado
-		
+
+;Inicializa o cursor
+	mov #VISOR, r0
+	mov #0, estado_cursor	;Estado inicial do cursor, 0 = invisível, 1 = visível
+	
 ;----------------------------------------------------------
 ;	Atualiza as informações da Tecla no visor.
 main_teclado:
 	mov		#-1,Tecla2
 	mov		#VISOR,r0
-	mov		#h82,INTE
+	mov		#h83,INTE		;;;ISSO AQUI ESTÁ CONFLITANDO COM ALGO
 loop_main_teclado:
 
-	; Pega informação de "Tecla".
-	; Se for >255, não há tecla;
-	; Se for <=255, Tecla contem a tecla digitada.
 	cmp		Tecla2,#255
 	bhi		loop_main_teclado
 	
@@ -336,13 +346,18 @@ loop_main_teclado:
 	mov		#VISOR,r0
 	br		loop_main_teclado
 	
-;	O relógio é formado por 6 palavras, cada uma representando uma parte do relógio.
-Tecla2:		dw	0
-
+programa2_fim:
+	mov		#36,r0
+	mov		#VISOR,r1
+	
+	
+;Alocando espaço para a tecla e estado do cursor
+Tecla2:			dw	0
+estado_cursor:	dw 	0
 
 ;==========================================================
-; Rotina de INTERRUPÇÃO
-; Só será chamada se as interrupções estiverem habilitadas
+; Rotina de INTERRUPÇÃO DO TECLADO
+;==========================================================
 isrteclado:
 	mov		r0,-(r6)	; Salva registradores (não é necessário salvar o R5)
 	mov		r1,-(r6)
@@ -353,9 +368,24 @@ isrteclado:
 
 	mov		INTS,r0		; Verifica se é INT do TECLADO
 	and		#2,r0
-	beq		ISR2teclado
+	beq		ISR2teclado_timerinterrupt
 	jsr		r7,ISRtec_teclado; Tratamento da INT do TECLADO
 	and		#hFFFD,INTS	; Desliga bit de INT TECLADO
+	
+	jmp ISR2teclado
+	
+	
+ISR2teclado_timerinterrupt:	
+	;Interrupção timer
+	mov		INTS,r3		; Verifica se é INT do TIMER
+	and		#1,r3
+	beq		ISR2teclado
+	jsr		r7, isrtimerfunc2	; Tratamento da INT do TIMER
+	and		#hFFFE,INTS	; Desliga bit de INT TIMER
+	
+	jmp ISR2teclado
+	
+	
 ISR2teclado:
 
 	mov		(r6)+,r5	; Retorna os registradores da pilha
@@ -367,7 +397,6 @@ ISR2teclado:
 
 	rti					; Return From Interrupt
 	
-
 ;----------------------------------------------------------
 ;	Tratamento das interrupções de teclado
 ;----------------------------------------------------------
@@ -380,3 +409,23 @@ ISRtec_1:
 
 ISRtec_Fim_teclado:
 	rts		r7
+	
+;==============================================================
+;Tratamento das interrupções de timer
+;===============================================================
+isrtimerfunc2:
+
+	; Alterna o estado do cursor
+	mov		estado_cursor, r3
+	and		#1, r3
+	beq		cursor_visivel
+	mov		#' ', r3
+	mov		#0, estado_cursor
+	br		cursor_done
+	
+cursor_visivel:
+	mov #'_', r3
+	mov #1, estado_cursor
+	
+cursor_done:
+	rts r7
