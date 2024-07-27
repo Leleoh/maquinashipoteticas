@@ -330,7 +330,7 @@ loop_reset_teclado:
 main_teclado:
 	mov		#-1,Tecla2
 	mov		#VISOR,r0
-	mov		#h83,INTE		;;;ISSO AQUI ESTÁ CONFLITANDO COM ALGO
+	mov		#h83,INTE		;
 loop_main_teclado:
 
 	cmp		Tecla2,#255
@@ -417,15 +417,19 @@ isrtimerfunc2:
 
 	; Alterna o estado do cursor
 	mov		estado_cursor, r3
-	and		#1, r3
+	and		#0, r3
 	beq		cursor_visivel
-	mov		#' ', r3
-	mov		#0, estado_cursor
+	
+	; Cursor invisível
+	mov		#VISOR, r0
+	mov		#' ', r0			;Deixa o cursor invisível
+	mov 	#0, estado_cursor
 	br		cursor_done
 	
 cursor_visivel:
-	mov #'_', r3
-	mov #1, estado_cursor
+	mov 	#VISOR, r0
+	mov		#'_', r0			;Deixa o cursor visível
+	mov 	#1, estado_cursor
 	
 cursor_done:
 	rts r7

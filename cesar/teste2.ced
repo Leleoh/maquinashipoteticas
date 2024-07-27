@@ -1,34 +1,34 @@
-;Leonel Ferraz Hernandez - 00585121 - Professor S√©rgio Cechin
+;Leonel Ferraz Hernandez - 00585121 - Professor SÈrgio Cechin
 ;============================================================
-;Refer√™ncia para o desenvolvimento			
+;ReferÍncia para o desenvolvimento			
 ;============================================================
 ;	CESAR 2024.1
 ;
-;	√Åreas de mem√≥ria:
+;	¡reas de memÛria:
 ;	0000 - 7FFF		PROGRAMA
-;					√Årea reservada para as fun√ß√µes e o stack
+;					¡rea reservada para as funÁıes e o stack
 ;	
 ;	7F00			Fundo da pilha
 ;
-;	7F00H - 7F01	In√≠cio da fun√ß√£o de rel√≥gio
+;	7F00H - 7F01	InÌcio da funÁ„o de relÛgio
 ;	
-;	7F02 - 7F03		In√≠cio da fun√ß√£o leitura string
+;	7F02 - 7F03		InÌcio da funÁ„o leitura string
 ;
-;	7F04 - 7F05		In√≠cio da fun√ß√£o movimenta letras
+;	7F04 - 7F05		InÌcio da funÁ„o movimenta letras
 ;
-;	7F06 - FF7F		√Årea livre (cuidar para deixar limpo)
+;	7F06 - FF7F		¡rea livre (cuidar para deixar limpo)
 ;
 ;	FF80 - FFBF 	PERIFERICOS16
-;					√Årea dos perif√©ricos
+;					¡rea dos perifÈricos
 ;
 ;	FFC0 - FFFF		PERIFERICOS8
-;					√Årea dos perif√©ricos
+;					¡rea dos perifÈricos
 ;
 ;	8000 - FF7F		APP
-;					Posi√ß√£o onde o programa ser√° colocado e as fun√ß√µes utilizadas
+;					PosiÁ„o onde o programa ser· colocado e as funÁıes utilizadas
 ;
 ;===========================================================
-;Atribuindo vari√°veis
+;Atribuindo vari·veis
 ;===========================================================
 
 PROGRAMA:		equ H0000
@@ -42,20 +42,20 @@ endereco2:		dw programa2
 
 	org H8000
 MOV #0,R0
-JSR R7,(H7F00(R0)) ; Chama a fun√ß√£o de Rel√≥gio
-MOV #2,R0 	; Chama a fun√ß√£o de Leitura de String
+JSR R7,(H7F00(R0)) ; Chama a funÁ„o de RelÛgio
+MOV #2,R0 	; Chama a funÁ„o de Leitura de String
 JSR R7,(H7F00(R0))
 
 HLT
 ;===========================================================
-;√Årea reservada para os perif√©ricos
+;¡rea reservada para os perifÈricos
 ;===========================================================
 
 ;Acesso em 16 bits
 		org		PERIFERICOS16
 STACK:
 		daw		[31];Area reservada
-IVET: 	dw 0		;Vetor de interrup√ß√£o
+IVET: 	dw 0		;Vetor de interrupÁ„o
 	
 ;Acesso em 8 bits
 		org PERIFERICOS8
@@ -68,25 +68,25 @@ TECDT:	db		0		; Dado do teclado
 VISOR:	dab		[36]	; Portas de acesso ao visor
 
 ;============================================================
-;In√≠cio do programa principal
+;InÌcio do programa principal
 ;============================================================
 		org PROGRAMA
 		
-;1) Desabilitando o sistema de interrup√ß√µes
+;1) Desabilitando o sistema de interrupÁıes
 	CLR INTE
 	CLR INTS
 
-;2)Setando o timer para gerar interrup√ß√£o a cada "100ms"
+;2)Setando o timer para gerar interrupÁ„o a cada "100ms"
 	
 
 ;Inicializa o processador e o hardware !IMPORTANTE
 	mov		#STACK,r6
 	jmp 	H8000
 	programa1:			
-		mov #isr, IVET	;Rotina de interrup√ß√£o
-		mov #100, TIMDT ;Interrup√ß√£o 100ms
+		mov #isr, IVET	;Rotina de interrupÁ„o
+		mov #100, TIMDT ;InterrupÁ„o 100ms
 	
-;Inicializa rel√≥gio
+;Inicializa relÛgio
 	mov		#4,r0
 	mov		#Relogio,r1
 
@@ -108,7 +108,7 @@ loop_reset:
 		
 ;==========================================================================
 ;	Programa principal
-;	Respons√°vel por atualizar a informa√ß√£o do rel√≥gio no visor.
+;	Respons·vel por atualizar a informaÁ„o do relÛgio no visor.
 main:
 	mov		#h83,INTE
 loop_main:
@@ -153,9 +153,9 @@ loop_reset_fim:
 	rts r7
 	
 ;--------------------------------------------------------------------------
-;	Coloca um n√∫mero de 2 digitos no visor
+;	Coloca um n˙mero de 2 digitos no visor
 ;	r0 -> valor
-;	r1 -> posi√ß√£o no visor
+;	r1 -> posiÁ„o no visor
 ;	dspDec = Display Decimal
 dspDec:
 	clr		r2
@@ -174,7 +174,7 @@ dspDec_1:
 	rts		r7
 		
 ;--------------------------------------------------------------------------
-;	O rel√≥gio √© formado por 6 palavras, cada uma representando uma parte do rel√≥gio.
+;	O relÛgio È formado por 6 palavras, cada uma representando uma parte do relÛgio.
 Relogio:
 Hora:		dw	0
 Minuto:		dw	0
@@ -184,24 +184,24 @@ Saida:		db 	0
 
 
 ;==========================================================================
-; Rotina de INTERRUP√á√ÉO
+; Rotina de INTERRUP«√O
 isr:
-	mov		r0,-(r6)	; Salva registradores (n√£o √© necess√°rio salvar o R5)
+	mov		r0,-(r6)	; Salva registradores (n„o È necess·rio salvar o R5)
 	mov		r1,-(r6)
 	mov		r2,-(r6)
 	mov		r3,-(r6)
 	mov		r4,-(r6)
 	mov		r5,-(r6)
 
-	;Interrup√ß√£o timer
-	mov		INTS,r0		; Verifica se √© INT do TIMER
+	;InterrupÁ„o timer
+	mov		INTS,r0		; Verifica se È INT do TIMER
 	and		#1,r0
 	beq		ISR2
 	jsr		r7,ISRtim	; Tratamento da INT do TIMER
 	and		#hFFFE,INTS	; Desliga bit de INT TIMER
 	
-	;Interrup√ß√£o teclado
-	mov INTS, r0		;Verifica se √© INT do teclado
+	;InterrupÁ„o teclado
+	mov INTS, r0		;Verifica se È INT do teclado
 	and #2, r0			;Compara r0 com 2
 	beq	ISR2
 	jsr r7, ISRtec		;Tratamento da int do teclado
@@ -220,7 +220,7 @@ ISR2:
 	
 
 ;==========================================================================
-;	Tratamento das interrup√ß√µes de timer
+;	Tratamento das interrupÁıes de timer
 ;==========================================================================
 ISRtim:
 	inc		Decimos
@@ -247,7 +247,7 @@ ISRtim_Fim:
 	rts		r7
 
 ;==================================================
-;Tratamento da interrup√ß√£o do teclado
+;Tratamento da interrupÁ„o do teclado
 ;=================================================
 ISRtec:
 	mov TECDT, r0
@@ -303,11 +303,11 @@ fim_timer:
 
 
 ;=========================================
-;SEGUNDA FUN√á√ÉO (Leitura de String de teclado com cursor piscante)
+;SEGUNDA FUN«√O (Leitura de String de teclado com cursor piscante)
 ;==========================================
 programa2:
 ;Resetando
-	clr		INTS				; Reset pedidos de interrup√ß√£o
+	clr		INTS				; Reset pedidos de interrupÁ„o
 	clr		TECST				; Reset estado do hardware do teclado
 	mov		#isrteclado,IVET	; Set Interrupt Service Rotine
 	mov 	#250, TIMDT			;Tempo desejado do sinal, 250ms
@@ -324,10 +324,10 @@ loop_reset_teclado:
 ;Inicializa o cursor
 	mov #VISOR, r0
 	mov #VISOR, posicao_cursor
-	mov #0, estado_cursor	;Estado inicial do cursor, 0 = invis√≠vel, 1 = vis√≠vel
+	mov #0, estado_cursor	;Estado inicial do cursor, 0 = invisÌvel, 1 = visÌvel
 	
 ;----------------------------------------------------------
-;	Atualiza as informa√ß√µes da Tecla no visor.
+;	Atualiza as informaÁıes da Tecla no visor.
 main_teclado:
 	mov		#-1,Tecla2
 	mov		#VISOR,r0
@@ -352,23 +352,23 @@ programa2_fim:
 	mov		#VISOR,r1
 	
 	
-;Alocando espa√ßo para a tecla e estado do cursor
+;Alocando espaÁo para a tecla e estado do cursor
 Tecla2:			dw	0
 estado_cursor:	dw 	0
 posicao_cursor: dw  0
 
 ;==========================================================
-; Rotina de INTERRUP√á√ÉO DO TECLADO
+; Rotina de INTERRUP«√O DO TECLADO
 ;==========================================================
 isrteclado:
-	mov		r0,-(r6)	; Salva registradores (n√£o √© necess√°rio salvar o R5)
+	mov		r0,-(r6)	; Salva registradores (n„o È necess·rio salvar o R5)
 	mov		r1,-(r6)
 	mov		r2,-(r6)
 	mov		r3,-(r6)
 	mov		r4,-(r6)
 	mov		r5,-(r6)
 
-	mov		INTS,r0		; Verifica se √© INT do TECLADO
+	mov		INTS,r0		; Verifica se È INT do TECLADO
 	and		#2,r0
 	beq		ISR2teclado_timerinterrupt
 	jsr		r7,ISRtec_teclado; Tratamento da INT do TECLADO
@@ -378,8 +378,8 @@ isrteclado:
 	
 	
 ISR2teclado_timerinterrupt:	
-	;Interrup√ß√£o timer
-	mov		INTS,r3		; Verifica se √© INT do TIMER
+	;InterrupÁ„o timer
+	mov		INTS,r3		; Verifica se È INT do TIMER
 	and		#1,r3
 	beq		ISR2teclado
 	jsr		r7, isrtimerfunc2	; Tratamento da INT do TIMER
@@ -400,7 +400,7 @@ ISR2teclado:
 	rti					; Return From Interrupt
 	
 ;----------------------------------------------------------
-;	Tratamento das interrup√ß√µes de teclado
+;	Tratamento das interrupÁıes de teclado
 ;----------------------------------------------------------
 ISRtec_teclado:
 	cmp		Tecla2,#256
@@ -413,23 +413,24 @@ ISRtec_Fim_teclado:
 	rts		r7
 	
 ;==============================================================
-;Tratamento das interrup√ß√µes de timer
+;Tratamento das interrupÁıes de timer
 ;===============================================================
 isrtimerfunc2:
 
 	; Alterna o estado do cursor
+	mov 	#VISOR, r0
 	mov		estado_cursor, r3
 	and		#0, r3
 	beq		cursor_visivel
 	
-	; Cursor invis√≠vel
-	mov		#' ', (r0)			;Deixa o cursor invis√≠vel
+	; Cursor invisÌvel
+	mov		#' ', (r0)			;Deixa o cursor invisÌvel
 	mov 	#0, estado_cursor
 	br		cursor_done
 	
 cursor_visivel:
 	mov 	posicao_cursor, r0
-	mov		#'_', r0			;Deixa o cursor vis√≠vel
+	mov		#'_', r0			;Deixa o cursor visÌvel
 	mov 	#1, estado_cursor
 	
 cursor_done:
