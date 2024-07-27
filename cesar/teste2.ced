@@ -314,48 +314,46 @@ programa2:
 		
 ;----------------------------------------------------------
 ;	Limpa o visor
-	mov		#36,r0
+	mov		#36,r4
 	mov		#VISOR,r1
 loop_reset_teclado:
 	mov		#' ',(r1)
 	inc		r1
-	sob		r0,loop_reset_teclado
+	sob		r4,loop_reset_teclado
 
 ;Inicializa o cursor
-	mov #VISOR, r0
-	mov #VISOR, posicao_cursor
-	mov #0, estado_cursor	;Estado inicial do cursor, 0 = invisível, 1 = visível
+	mov #VISOR, r4
+	mov #0, r5	;Estado inicial do cursor, 0 = invisível, 1 = visível
 	
 ;----------------------------------------------------------
 ;	Atualiza as informações da Tecla no visor.
 main_teclado:
 	mov		#-1,Tecla2
-	mov		#VISOR,r0
+	mov		#VISOR,r4
 	mov		#h83,INTE		
 loop_main_teclado:
 
 	cmp		Tecla2,#255
 	bhi		loop_main_teclado
 	
-	mov		Tecla2,(r0)
+	mov		Tecla2,(r4)
 	mov		#-1,Tecla2
 	
-	inc		r0
-	tst		r0
+	inc		r4
+	tst		r4
 	bne		loop_main_teclado
 	
-	mov		#VISOR,r0
+	mov		#VISOR,r4
 	br		loop_main_teclado
 	
 programa2_fim:
-	mov		#36,r0
+	mov		#36,r4
 	mov		#VISOR,r1
 	
 	
 ;Alocando espaço para a tecla e estado do cursor
 Tecla2:			dw	0
-estado_cursor:	dw 	0
-posicao_cursor: dw  0
+;estado_cursor:	dw 	0
 
 ;==========================================================
 ; Rotina de INTERRUPÇÃO DO TECLADO
@@ -365,10 +363,8 @@ isrteclado:
 	mov		r1,-(r6)
 	mov		r2,-(r6)
 	mov		r3,-(r6)
-	mov		r4,-(r6)
-	mov		r5,-(r6)
 
-	mov		INTS,r0		; Verifica se é INT do TECLADO
+	mov		INTS,r0	; Verifica se é INT do TECLADO
 	and		#2,r0
 	beq		ISR2teclado_timerinterrupt
 	jsr		r7,ISRtec_teclado; Tratamento da INT do TECLADO
@@ -390,8 +386,7 @@ ISR2teclado_timerinterrupt:
 	
 ISR2teclado:
 
-	mov		(r6)+,r5	; Retorna os registradores da pilha
-	mov		(r6)+,r4
+	; Retorna os registradores da pilha
 	mov		(r6)+,r3
 	mov		(r6)+,r2
 	mov		(r6)+,r1
@@ -417,21 +412,19 @@ ISRtec_Fim_teclado:
 ;===============================================================
 isrtimerfunc2:
 
-	; Alterna o estado do cursor
-	mov 	#VISOR, r0
-	mov		estado_cursor, r3
+	; Alterna o estado do cursor	
+	mov		r5, r3
 	and		#0, r3
 	beq		cursor_visivel
 	
 	; Cursor invisível
-	mov		#' ', (r0)			;Deixa o cursor invisível
-	mov 	#0, estado_cursor
+	mov		#' ', (r4)			;Deixa o cursor invisível
+	mov 	#0, r5
 	br		cursor_done
 	
 cursor_visivel:
-	mov 	posicao_cursor, r0
-	mov		#'_', r0			;Deixa o cursor visível
-	mov 	#1, estado_cursor
+	mov		#'_', (r4)			;Deixa o cursor visível
+	mov 	#1, r5
 	
 cursor_done:
 	rts r7
