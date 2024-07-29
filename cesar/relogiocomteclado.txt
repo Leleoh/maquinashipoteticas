@@ -339,6 +339,8 @@ loop_main_teclado:
 	beq		ctrl_m2	
 	cmp 	Tecla2, #10
 	beq 	ctrl_j2				;Ctrl-j
+	cmp 	Tecla2, #8
+	beq 	backspace			;Apagar
 	
 	
 restomain2:
@@ -369,11 +371,13 @@ programa2_fim:
 	
 ;Rotina para limpar o visor	
 limpa_visor:
+	;Limpa o visor
 	mov		#36,r4
 	mov		#VISOR,r1
+loop_reset_teclado_fim:
 	mov		#' ',(r1)
 	inc		r1
-	sob		r4,loop_reset_teclado
+	sob		r4,loop_reset_teclado_fim
 	rts 	r7
 
 	
@@ -390,6 +394,19 @@ loop_reset2:
 ctrl_m2:
 	mov 	#VISOR, r4
 	mov 	#-1, Tecla2
+	jmp		loop_main_teclado
+	
+backspace:
+	mov 	#-1, Tecla2
+	cmp 	#VISOR, r4
+	beq 	jmp_main
+	mov 	#' ', (r4)
+	dec 	r4
+	mov 	#' ', (r4)
+	jmp 	loop_main_teclado
+	
+jmp_main:
+	mov 	#VISOR, r4
 	jmp		loop_main_teclado
 	
 ;VARIÁVEIS
