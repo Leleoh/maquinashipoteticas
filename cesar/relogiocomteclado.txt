@@ -375,12 +375,17 @@ limpa_visor:
 	inc		r1
 	sob		r4,loop_reset_teclado
 	rts 	r7
+
 	
 ctrl_j2:
-	mov 	r4, Posicao_cursor		;Salva a posição atual do cursor
-	jsr 	r7, limpa_visor
-	mov 	Posicao_cursor, r4 
-	br 		loop_main_teclado
+	mov		#36,r0
+	mov		#VISOR,r1
+loop_reset2:
+	mov		#' ',(r1)
+	inc		r1
+	sob		r0,loop_reset2
+	mov 	#-1, Tecla2
+	jmp		loop_main_teclado
 	
 ctrl_m2:
 	mov 	#VISOR, r4
