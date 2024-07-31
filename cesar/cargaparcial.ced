@@ -1,0 +1,8 @@
+org H8000
+MOV #0,R0				; Chama a função de Relógio
+JSR R7,(H7F00(R0)) 		
+MOV #2,R0 				; Chama a função de Leitura de String
+JSR R7,(H7F00(R0))
+MOV #4,R0 				; Chama a função de Movimentação
+JSR R7,(H7F00(R0))
+HLT
