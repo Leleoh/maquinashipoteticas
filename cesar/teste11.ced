@@ -621,61 +621,61 @@ ctrl_m3:
 ;==========================================================
 velocidade0:
 	mov 	#10, contador
-	mov 	contador, contadoraux
+	mov 	contador, r5
 	mov		#-1,Tecla3
 	jmp		loop_main_teclado
 	
 velocidade1:
 	mov 	#9, contador
-	mov 	contador, contadoraux
+	mov 	contador, r5
 	mov		#-1,Tecla3
 	jmp		loop_main_teclado
 	
 velocidade2:
 	mov 	#8, contador
-	mov 	contador, contadoraux
+	mov 	contador, r5
 	mov		#-1,Tecla3
 	jmp		loop_main_teclado
 	
 velocidade3:
 	mov 	#7, contador
-	mov 	contador, contadoraux
+	mov 	contador, r5
 	mov		#-1,Tecla3
 	jmp		loop_main_teclado
 	
 velocidade4:
 	mov 	#6, contador
-	mov 	contador, contadoraux
+	mov 	contador, r5
 	mov		#-1,Tecla3
 	jmp		loop_main_teclado
 	
 velocidade5:
 	mov 	#5, contador
-	mov 	contador, contadoraux
+	mov 	contador, r5
 	mov		#-1,Tecla3
 	jmp		loop_main_teclado
 
 velocidade6:
 	mov 	#4, contador
-	mov 	contador, contadoraux
+	mov 	contador, r5
 	mov		#-1,Tecla3
 	jmp		loop_main_teclado
 
 velocidade7:
 	mov 	#3, contador
-	mov 	contador, contadoraux
+	mov 	contador, r5
 	mov		#-1,Tecla3
 	jmp		loop_main_teclado
 
 velocidade8:
 	mov 	#2, contador
-	mov 	contador, contadoraux
+	mov 	contador, r5
 	mov		#-1,Tecla3
 	jmp		loop_main_teclado
 	
 velocidade9:
 	mov 	#1, contador
-	mov 	contador, contadoraux
+	mov 	contador, r5
 	mov		#-1,Tecla3
 	jmp		loop_main_teclado
 	
@@ -748,17 +748,18 @@ ISRtec_Fim_teclado3:
 ;Tratamento das interrupções de timer
 ;==============================================================
 isrtimerfunc3:
-	dec 	contadoraux
+	dec 	r5
+	tst 	r5
 	beq		reset_counter
 	
-
 isrtimerfunc3_fim:
-	rts 	r7
-
+	rts 	r7	
+	
+	
 reset_counter:
-	clr 	(r4)
+	mov 	#' ', (r4)
 	inc 	r4
 	mov		#'O', (r4)
-	mov 	contador, contadoraux
+	mov 	contador, r4
 	br		isrtimerfunc3_fim
 	
