@@ -28,9 +28,9 @@
 ;===========================================================
 	org H7F00
 STACK:
-endereco1: 		dw programa1
-endereco2:		dw programa2
-endereco3:		dw programa3
+	endereco1: 		dw programa1
+	endereco2:		dw programa2
+	endereco3:		dw programa3
 
 	org H8000
 MOV #0,R0				; Chama a função de Relógio
@@ -73,9 +73,20 @@ VISOR:	dab		[36]	; Portas de acesso ao visor
 ;Inicializa o processador e o hardware
 	mov		#STACK,r6
 	jmp 	H8000
-	programa1:			
-		mov #isr, IVET	;Rotina de interrupção
-		mov #100, TIMDT ;Interrupção setada para 100ms
+	
+;==========================================================
+;Função 1, relógio com controles de teclado
+;==========================================================
+;Funcionamento: Essa função exibe um relógio no visor a partir de 
+;00:00:00, e de acordo com a tecla pressionada incrementa uma parte
+;H: Incrementa as horas
+;M: Incrementa os minutos
+;Z: Zera o relógio
+;Ctrl-F: Encerra.
+;==========================================================
+programa1:			
+	mov #isr, IVET	;Rotina de interrupção
+	mov #100, TIMDT ;Interrupção setada para 100ms
 	
 ;Inicializa relógio
 	mov		#4,r0
@@ -96,9 +107,6 @@ loop_reset:
 	inc		r1
 	sob		r0,loop_reset
 		
-;==========================================================
-;Programa main da função 1
-;==========================================================
 main:
 	mov		#h83,INTE
 loop_main:
@@ -293,6 +301,12 @@ fim_timer:
 
 ;===================================================================
 ;INÍCIO DA SEGUNDA FUNÇÃO (LEITURA DE STRING)
+;===================================================================
+;Funcionamento: Essa função é capaz de ler o que é escrito no teclado,
+;apresentando um cursor para mostrar aonde irá escrever.
+;Ela também apresenta a função de apagar com backspace, voltar para o início
+;com Ctrl-M, e apagar tudo mantendo o visor na posição atual Ctrl-J
+;Ctrl-F encerra.
 ;===================================================================
 programa2:
 ;Resetando
@@ -508,6 +522,15 @@ loop_reset_fim2:
 ;============================================================================
 ;INÍCIO DA TERCEIRA FUNÇÃO, MOVIMENTADOR DE LETRA COM CONTROLE DE VELOCIDADE
 ;============================================================================
+;Funcionamento do programa: O visor inicia em branco, e, ao apertar a tecla Ctrl-M,
+;a letra "O" será adicionada na primeira posição do visor.
+;Ao apertar os algarismos de 0 a 9 do teclado, a letra "O" começa a percorrer o visor
+;de acordo com a velocidade escolhida pelo algarismo, sendo respectivamente o 9 a mais rápida
+;e o 0 a mais lenta.
+;IMPORTANTE: O ciclo acontece apenas uma vez, para fazer novamente, deve-se apertar Ctrl-m novamente
+;e escolher uma velocidade novamente.
+;Ctrl-F encerra.
+;============================================================================
 programa3:
 	; Resetando
     clr     INTS                ; Reset pedidos de interrupção
@@ -702,6 +725,7 @@ ISRtec_func3:
 	cmp		Tecla3,#256
 	bls		ISRtec_3
 	mov 	TECDT, Tecla3
+	mov		#-1,TECDT
 
 ISRtec_3:
 	clr		TECST
@@ -715,18 +739,22 @@ isrtimerfunc3:
 	dec 	contadoraux
 	tst 	contadoraux
 	beq		reseta_contador
-	
 	br		isrtimerfunc3_fim
 	
 reseta_contador:
 	mov 	#' ', (r4)
 	inc 	r4
+	tst 	r4
+	beq		resetfunc3
 	mov		#'O', (r4)
 	mov 	contador, contadoraux
 	
 isrtimerfunc3_fim:
-	rts 	r7	
-
+	rts 	r7
+	
+resetfunc3:
+	mov 	#H82, INTE
+	br		isrtimerfunc3_fim
 ;=================================================================
 ;Fim do programa 3
 fimprograma3:
