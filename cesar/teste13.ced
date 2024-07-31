@@ -31,11 +31,6 @@
 ;Atribuindo variáveis
 ;===========================================================
 
-PROGRAMA:		equ H0000
-APP: 			equ H8000
-PERIFERICOS16:	equ HFF80
-PERIFERICOS8:	equ HFFC0
-
 	org H7F00
 STACK:
 endereco1: 		dw programa1
@@ -527,264 +522,183 @@ loop_reset_fim2:
 ;Terceira Função (Movimentação de letras no visor com controle de velocidade
 ;============================================================================
 programa3:
-	; Resetando
+    ; Resetando
     clr     INTS                ; Reset pedidos de interrupção
     clr     TECST               ; Reset estado do hardware do teclado
-	clr 	TECDT				
+    clr     TECDT
     mov     #isrteclado3,IVET   ; Set Interrupt Service Routine
     mov     #100, TIMDT         ; Tempo desejado do sinal, 100ms
-	
-	;Limpa o visor
-	mov		#36,r4
-	mov		#VISOR,r1
+    
+    ; Limpa o visor
+    mov     #36,r4
+    mov     #VISOR,r1
 loop_reset_teclado3:
-	mov		#' ',(r1)
-	inc		r1
-	sob		r4,loop_reset_teclado3
+    mov     #' ',(r1)
+    inc     r1
+    sob     r4,loop_reset_teclado3
 
 ;==========================================================
-;	Atualiza as informações da Tecla no visor.
+; Atualiza as informações da Tecla no visor.
 ;==========================================================
 main_teclado3:
-	mov		#-1,Tecla3
-	mov		#VISOR,r4
-	mov		#h82,INTE		
+    mov     #-1,Tecla3
+    mov     #VISOR,r4
+    mov     #h82,INTE        
 loop_main_teclado3:
-	cmp 	Tecla3, #13				;Verificação do ctrl-m
-	beq		ctrl_m3
-	cmp     Tecla3, #6				;Verificação ctrl-f  FAZER DEPOIS
-    beq     skipfimprograma3
+    cmp     Tecla3, #13              ; Verificação do ctrl-m
+    beq     ctrl_m3
+    cmp     Tecla3, #6               ; Verificação ctrl-f  FAZER DEPOIS
+    beq     fim3skip
     cmp     Tecla3, #'0'
-    beq     jmp_velocidade0
+    beq     velocidade0
     cmp     Tecla3, #'1'
-    beq     jmp_velocidade1
+    beq     velocidade1
     cmp     Tecla3, #'2'
-    beq     jmp_velocidade2
+    beq     velocidade2
     cmp     Tecla3, #'3'
-    beq     jmp_velocidade3
+    beq     velocidade3
     cmp     Tecla3, #'4'
-    beq     jmp_velocidade4
+    beq     velocidade4
     cmp     Tecla3, #'5'
-    beq     jmp_velocidade5
+    beq     velocidade5
     cmp     Tecla3, #'6'
-    beq     jmp_velocidade6
+    beq     velocidade6
     cmp     Tecla3, #'7'
-    beq     jmp_velocidade7
+    beq     velocidade7
     cmp     Tecla3, #'8'
-    beq     jmp_velocidade8
+    beq     velocidade8
     cmp     Tecla3, #'9'
-    beq     jmp_velocidade9
-	br		loop_main_teclado3
-	
-skipfimprograma3:
-	jmp 	fimprograma3
-	
-;Lança o "O" na tela pela primeira vez na primeira posição do visor
+    beq     velocidade9
+    br      loop_main_teclado3
+
+; Lança o "O" na tela pela primeira vez na primeira posição do visor
 ctrl_m3:
-	mov 	contador, contadoraux
-	mov 	#VISOR, r4
-	mov 	#'O', (r4)
-	mov		#-1,Tecla3
-	mov 	#H83, INTE
-	jmp		loop_main_teclado3
-	
-jmp_velocidade0:
-	jmp 	velocidade0
-	
-jmp_velocidade1:
-	jmp 	velocidade1
-	
-jmp_velocidade2:
-	jmp 	velocidade2
-	
-jmp_velocidade3:
-	jmp 	velocidade3
+    mov     contador, contadoraux
+    mov     #VISOR, r4
+    mov     #'O', (r4)
+    mov     #-1,Tecla3
+    mov     #H83, INTE
+    jmp     loop_main_teclado3
 
-jmp_velocidade4:
-	jmp 	velocidade4
-	
-jmp_velocidade5:
-	jmp 	velocidade5
-	
-jmp_velocidade6:
-	jmp 	velocidade6
-	
-jmp_velocidade7:
-	jmp 	velocidade7
-	
-jmp_velocidade8:
-	jmp 	velocidade8
-	
-jmp_velocidade9:
-	jmp 	velocidade9
-
-
-
-	
 ;==========================================================
-;Controle das velocidades
+; Controle das velocidades
 ;==========================================================
 velocidade0:
-	mov 	#10, contador
-	mov 	contador, contadoraux
-	mov		#-1,Tecla3
-	jmp		loop_main_teclado
-	
+    mov     #10, contador
+    jmp     reset_tecla3
+    
 velocidade1:
-	mov 	#9, contador
-	mov 	contador, contadoraux
-	mov		#-1,Tecla3
-	jmp		loop_main_teclado
-	
+    mov     #9, contador
+    jmp     reset_tecla3
+    
 velocidade2:
-	mov 	#8, contador
-	mov 	contador, contadoraux
-	mov		#-1,Tecla3
-	jmp		loop_main_teclado
-	
+    mov     #8, contador
+    jmp     reset_tecla3
+    
 velocidade3:
-	mov 	#7, contador
-	mov 	contador, contadoraux
-	mov		#-1,Tecla3
-	jmp		loop_main_teclado
-	
+    mov     #7, contador
+    jmp     reset_tecla3
+    
 velocidade4:
-	mov 	#6, contador
-	mov 	contador, contadoraux
-	mov		#-1,Tecla3
-	jmp		loop_main_teclado
-	
+    mov     #6, contador
+    jmp     reset_tecla3
+    
 velocidade5:
-	mov 	#5, contador
-	mov 	contador, contadoraux
-	mov		#-1,Tecla3
-	jmp		loop_main_teclado
-
+    mov     #5, contador
+    jmp     reset_tecla3
+    
 velocidade6:
-	mov 	#4, contador
-	mov 	contador, contadoraux
-	mov		#-1,Tecla3
-	jmp		loop_main_teclado
-
+    mov     #4, contador
+    jmp     reset_tecla3
+    
 velocidade7:
-	mov 	#3, contador
-	mov 	contador, contadoraux
-	mov		#-1,Tecla3
-	jmp		loop_main_teclado
-
+    mov     #3, contador
+    jmp     reset_tecla3
+    
 velocidade8:
-	mov 	#2, contador
-	mov 	contador, contadoraux
-	mov		#-1,Tecla3
-	jmp		loop_main_teclado
-	
+    mov     #2, contador
+    jmp     reset_tecla3
+    
 velocidade9:
-	mov 	#1, contador
-	mov 	contador, contadoraux
-	mov		#-1,Tecla3
-	jmp		loop_main_teclado
-	
+    mov     #1, contador
+    jmp     reset_tecla3
 
-
-;==========================================================
-;Variáveis
-;==========================================================
-contador: 			dw 0
-contadoraux:		dw 0
-Tecla3:				dw 0
-
+reset_tecla3:
+    mov     contador, r5
+    mov     #-1,Tecla3
+    jmp     loop_main_teclado3
 
 ;==========================================================
-;Rotina de INTERRUPÇÃO DO TECLADO
+; Variáveis
+;==========================================================
+contador:           dw 0
+contadoraux:        dw 0
+Tecla3:             dw 0
+
+;==========================================================
+; Rotina de INTERRUPÇÃO DO TECLADO
 ;==========================================================
 isrteclado3:
-	mov		r0,-(r6)	; Salva registradores (não é necessário salvar o R5)
-	mov		r1,-(r6)
-	mov		r2,-(r6)
-	mov		r3,-(r6)
+    mov     r0,-(r6)    ; Salva registradores (não é necessário salvar o R5)
+    mov     r1,-(r6)
+    mov     r2,-(r6)
+    mov     r3,-(r6)
 
-	mov		INTS,r0		;Verifica se é INT do TECLADO
-	and		#2,r0
-	beq		ISRtec_teclado3
-	jsr		r7,ISRtec_func3	;Tratamento da INT do TECLADO
-	and		#hFFFD,INTS		; Desliga bit de INT TECLADO
-	
-	jmp 	ISR3teclado
-	
-	
-ISRtec_teclado3:	
-	;Interrupção timer
-	mov		INTS,r3		; Verifica se é INT do TIMER
-	and		#1,r3
-	beq		ISR3teclado
-	jsr		r7, isrtimerfunc3	;CONFIGURAR
-	and		#hFFFE,INTS	; Desliga bit de INT TIMER
-	
-	jmp 	ISR3teclado
-	
-	
+    mov     INTS,r0     ; Verifica se é INT do TECLADO
+    and     #2,r0
+    beq     ISRtec_teclado3
+    jsr     r7,ISRtec_func3 ; Tratamento da INT do TECLADO
+    and     #hFFFD,INTS     ; Desliga bit de INT TECLADO
+    
+    jmp     ISR3teclado
+    
+ISRtec_teclado3:    
+    ; Interrupção timer
+    mov     INTS,r3     ; Verifica se é INT do TIMER
+    and     #1,r3
+    beq     ISR3teclado
+    jsr     r7, isrtimerfunc3 ; Tratamento da INT do TIMER
+    and     #hFFFE,INTS     ; Desliga bit de INT TIMER
+    
+    jmp     ISR3teclado
+    
 ISR3teclado:
+    ; Retorna os registradores da pilha
+    mov     (r6)+,r3
+    mov     (r6)+,r2
+    mov     (r6)+,r1
+    mov     (r6)+,r0
 
-	; Retorna os registradores da pilha
-	mov		(r6)+,r3
-	mov		(r6)+,r2
-	mov		(r6)+,r1
-	mov		(r6)+,r0
-
-	rti					; Return From Interrupt
-	
+    rti                 ; Return From Interrupt
+    
 ;============================================================
-;Tratamento das interrupções de teclado
+; Tratamento das interrupções de teclado
 ;============================================================
 ISRtec_func3:
-	cmp		Tecla3,#256
-	bls		ISRtec_3
-	mov 	TECDT, Tecla3
-
+    cmp     Tecla3,#256
+    bls     ISRtec_3
+    mov     TECDT, Tecla3
 
 ISRtec_3:
-	clr		TECST
+    clr     TECST
 
 ISRtec_Fim_teclado3:
-	rts		r7
+    rts     r7
 
-	
 ;==============================================================
-;Tratamento das interrupções de timer
+; Tratamento das interrupções de timer
 ;==============================================================
 isrtimerfunc3:
-	dec 	contadoraux
-	tst 	contadoraux
-	beq		reset_counter
-	
-	
+    dec     r5
+    tst     r5
+    beq     reset_counter
+    
 reset_counter:
-	mov 	#' ', (r4)
-	inc 	r4
-	mov		#'O', (r4)
-	mov 	contador, contadoraux
-	br		isrtimerfunc3_fim
-	
+    mov     #' ', (r4)
+    inc     r4
+    mov     #'O', (r4)
+    mov     contador, r5
+    br      isrtimerfunc3_fim
+    
 isrtimerfunc3_fim:
-	rts 	r7	
-	
-
-fimprograma3:
-	mov		#36,r0
-	mov		#VISOR,r1
-loop_reset_fim3:
-	mov		#' ',(r1)
-	inc		r1
-	sob		r0,loop_reset_fim3
-	clr INTE
-	clr INTS
-	clr TIMDT
-	clr TECDT
-	clr TECST
-	clr r0
-	clr r1
-	clr r2
-	clr r3
-	clr r4
-	clr r5
-	rts r7		
+    rts     r7

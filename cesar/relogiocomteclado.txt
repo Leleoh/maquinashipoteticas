@@ -31,11 +31,6 @@
 ;Atribuindo variáveis
 ;===========================================================
 
-PROGRAMA:		equ H0000
-APP: 			equ H8000
-PERIFERICOS16:	equ HFF80
-PERIFERICOS8:	equ HFFC0
-
 	org H7F00
 STACK:
 endereco1: 		dw programa1
@@ -341,7 +336,7 @@ loop_main_teclado:
 	cmp 	Tecla2, #8
 	beq 	backspace			;Apagar
 	cmp		Tecla2, #6
-	beq		fim2skip				;Fim do programa 2
+	beq		fim2skip				;Fim do programa 2 CTRL-F
 	
 	
 restomain2:
@@ -405,26 +400,7 @@ backspace:
 	mov 	#' ', (r4)
 	jmp 	loop_main_teclado
 
-fim2:
-	mov		#36,r0
-	mov		#VISOR,r1
-loop_reset_fim2:
-	mov		#' ',(r1)
-	inc		r1
-	sob		r0,loop_reset_fim2
-	clr INTE
-	clr INTS
-	clr TIMDT
-	clr TECDT
-	clr TECST
-	clr r0
-	clr r1
-	clr r2
-	clr r3
-	clr r4
-	clr r5
-	rts r7		
-	
+
 jmp_main:
 	mov 	#VISOR, r4
 	jmp		loop_main_teclado
@@ -514,9 +490,28 @@ skip:
 cursor_done:
 	rts r7
 
-
-
-
+;===============================================
+;Fim do programa 2
+fim2:
+	mov		#36,r0
+	mov		#VISOR,r1
+loop_reset_fim2:
+	mov		#' ',(r1)
+	inc		r1
+	sob		r0,loop_reset_fim2
+	clr INTE
+	clr INTS
+	clr TIMDT
+	clr TECDT
+	clr TECST
+	clr r0
+	clr r1
+	clr r2
+	clr r3
+	clr r4
+	clr r5
+	rts r7		
+;=================================================
 
 
 
@@ -552,8 +547,6 @@ main_teclado3:
 loop_main_teclado3:
 	cmp 	Tecla3, #13				;Verificação do ctrl-m
 	beq		ctrl_m3
-	cmp     Tecla3, #6				;Verificação ctrl-f  FAZER DEPOIS
-    beq     skipfimprograma3
     cmp     Tecla3, #'0'
     beq     jmp_velocidade0
     cmp     Tecla3, #'1'
@@ -574,14 +567,16 @@ loop_main_teclado3:
     beq     jmp_velocidade8
     cmp     Tecla3, #'9'
     beq     jmp_velocidade9
+	cmp     Tecla3, #6				;Verificação ctrl-f  FAZER DEPOIS
+    ;beq     skipfimprograma3
 	br		loop_main_teclado3
 	
-skipfimprograma3:
-	jmp 	fimprograma3
+;skipfimprograma3:
+	;jmp 	fimprograma3
 	
 ;Lança o "O" na tela pela primeira vez na primeira posição do visor
 ctrl_m3:
-	mov 	contador, contadoraux
+	;mov 	contador, contadoraux
 	mov 	#VISOR, r4
 	mov 	#'O', (r4)
 	mov		#-1,Tecla3
@@ -628,61 +623,61 @@ velocidade0:
 	mov 	#10, contador
 	mov 	contador, contadoraux
 	mov		#-1,Tecla3
-	jmp		loop_main_teclado
+	jmp		loop_main_teclado3
 	
 velocidade1:
 	mov 	#9, contador
 	mov 	contador, contadoraux
 	mov		#-1,Tecla3
-	jmp		loop_main_teclado
+	jmp		loop_main_teclado3
 	
 velocidade2:
 	mov 	#8, contador
 	mov 	contador, contadoraux
 	mov		#-1,Tecla3
-	jmp		loop_main_teclado
+	jmp		loop_main_teclado3
 	
 velocidade3:
 	mov 	#7, contador
 	mov 	contador, contadoraux
 	mov		#-1,Tecla3
-	jmp		loop_main_teclado
+	jmp		loop_main_teclado3
 	
 velocidade4:
 	mov 	#6, contador
 	mov 	contador, contadoraux
 	mov		#-1,Tecla3
-	jmp		loop_main_teclado
+	jmp		loop_main_teclado3
 	
 velocidade5:
 	mov 	#5, contador
 	mov 	contador, contadoraux
 	mov		#-1,Tecla3
-	jmp		loop_main_teclado
+	jmp		loop_main_teclado3
 
 velocidade6:
 	mov 	#4, contador
 	mov 	contador, contadoraux
 	mov		#-1,Tecla3
-	jmp		loop_main_teclado
+	jmp		loop_main_teclado3
 
 velocidade7:
 	mov 	#3, contador
 	mov 	contador, contadoraux
 	mov		#-1,Tecla3
-	jmp		loop_main_teclado
+	jmp		loop_main_teclado3
 
 velocidade8:
 	mov 	#2, contador
 	mov 	contador, contadoraux
 	mov		#-1,Tecla3
-	jmp		loop_main_teclado
+	jmp		loop_main_teclado3
 	
 velocidade9:
 	mov 	#1, contador
 	mov 	contador, contadoraux
 	mov		#-1,Tecla3
-	jmp		loop_main_teclado
+	jmp		loop_main_teclado3
 	
 
 
@@ -769,6 +764,8 @@ isrtimerfunc3_fim:
 	rts 	r7	
 	
 
+;=================================================================
+;Fim do programa 3
 fimprograma3:
 	mov		#36,r0
 	mov		#VISOR,r1
@@ -787,4 +784,5 @@ loop_reset_fim3:
 	clr r3
 	clr r4
 	clr r5
-	rts r7		
+	rts r7
+;==================================================================	
