@@ -61,7 +61,7 @@ leitura:
 	mov quantidadebytes, ax
     mov si, offset buffer
 	
-loop_impressao:
+;loop_impressao:
     ;lodsb               ; Carregar byte de [SI] em AL e incrementar SI
     ;mov ah, 0Eh         ; Função para exibir caractere
     ;int 10h             ; Interrupção para exibir o caractere
@@ -73,24 +73,57 @@ loop_impressao:
 percorrendo_buffer:
 	mov al, [si]
 	cmp al, '#'		;Verifica se é uma linha de posição inicial
-	jz 	lendoid_rainha
+	jz 	lendo_linha_inicial
 	inc si
 	loop percorrendo_buffer
 	jmp fim_programa
 	
 	
-lendoid_rainha:
+lendo_linha_inicial:
 	;Lendo o ID da rainha
 	inc si
 	mov al, [si+1] ;Ler o ID da rainha, assumindo que está no índice 2
     sub al, '0'        ;Converter de ASCII para valor numérico
     mov id_rainha, al  ;Armazenar o ID da rainha em id_rainha
 
-	;Pulando para a próxima linha
-	;jmp leitura ;TESTAR REMOVER DEPOIS
-
+	;Lendo coordenada x
+	;inc si
+	;inc si
+	mov al, [si+3]	;Pegando o primeiro dígito de x, assumindo que ele está no índice 2
+	sub al, '0'
+	mov x_coord, al
+	;Verificando se existe segundo dígito em x
+    ;inc si
+    ;mov ah, [si]         
+    ;cmp ah, ','          
+    ;jne ler_segundo_digito_x
+	
+	;Lendo coordenada y se não houver segundo dígito para X
+	;inc si
+	;inc si
+	;mov al, [si]
+	;sub al, '0'
+	;mov y_coord, al
+	;jmp imprimir
+	
+;ler_segundo_digito_x:
+	;sub ah, '0'         
+    ;mov al, x_coord
+    ;imul al, 10          ; Multiplicar o primeiro dígito por 10
+    ;add al, ah           ; Adicionar o segundo dígito
+    ;mov x_coord, al      ; Armazenar a coordenada X completa
+	
+	; Lendo a coordenada Y
+    ;inc si
+    ;inc si
+    mov al, [si+5]         ; Ler o primeiro dígito da coordenada Y
+    sub al, '0'          ; Converter de ASCII para valor numérico
+    mov y_coord, al      ; Armazenar o primeiro dígito em y_coord
+	;Verificando se existe segundo dígito em y
+	
+	
 imprimir:
-	;Exibir ID
+	;Exibir ID, coordenada x e coordenada y
     lea dx, msg_id
     mov ah, 09h
     int 21h
@@ -99,16 +132,23 @@ imprimir:
     mov ah, 0Eh        ; Função para exibir caractere
     int 10h            ; Interrupção para exibir o caractere
 	
-	;Forçando o ID da rainha a ser 5
-	;mov al, 6            ; Coloca o valor 5 no registrador AL
-	;mov [id_rainha], al   ; Armazena o valor 5 em id_rainha
-
-	;Exibir ID lido para depuração
-	;mov al, [id_rainha]
-	;add al, '0'           ; Converter valor numérico para ASCII
-	;mov ah, 0Eh           ; Função para exibir caractere
-	;int 10h               ; Exibir o caractere
-
+	;Exibindo coordenada x
+	lea dx, msg_x
+	mov ah, 09h
+	int 21h
+	mov al, x_coord
+	add al, '0'
+	mov ah, 0Eh
+	int 10h
+	
+	;Exibindo coordenada y
+	lea dx, msg_y
+	mov ah, 09h
+	int 21h
+	mov al, y_coord
+	add al, '0'
+	mov ah, 0Eh
+	int 10h
  
     ;Pulando para a próxima linha
     lea dx, newline
