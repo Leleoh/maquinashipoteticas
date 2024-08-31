@@ -13,6 +13,7 @@
     msgerroposicao db 'Posicao inicial invalida!',13,10,'$'
     msgerroabertura db 'Erro ao abrir arquivo!',13,10,'$'
 	msgerroidrainha db 'Identificador de rainha invalido, deve ser um valor entre 0 e 9!',13,10,'$'
+	posicaofinal db 'Posicao final $'
 	msgbloqueio1 db ' Rainha $'
 	msgbloqueio2 db ' bloqueada pela rainha $'
     board db 64 dup(64 dup(0))  ; Tabuleiro 64x64 inicializado com 0
@@ -117,10 +118,10 @@ lendo_linha_inicial:
     sub al, "0" 	;Converter de ASCII para valor numérico
 
 	;Verifica se o ID da rainha é um número entre 0 e 9 
-	cmp al, 0 			;Compara o valor atual com 0
-	jl erro_id			;Se for menor que 0, pula para erro ID
-	cmp al, 9			;Compara o valor atual com 9
-	jg erro_id			;Se for maior do que 9, pula para erro ID
+	;cmp al, 0 			;Compara o valor atual com 0
+	;jl erro_id			;Se for menor que 0, pula para erro ID
+	;cmp al, 9			;Compara o valor atual com 9
+	;jg erro_id			;Se for maior do que 9, pula para erro ID
    
     mov id_rainha, al  	;Armazenar o ID da rainha em id_rainha
 	mov ah, 0			;0 na parte "alta de ah para fazer ax"
@@ -202,7 +203,8 @@ loop_distancia:
 	cmp al, "L"			;Compara al com Leste
 	je movimento_leste	;Pula para movimento leste
 
-;Vamos somar ao Y para ir para o norte
+;-------------------------------------------------------------
+;MOVIMENTA NORTE
 movimento_norte:
 	mov id_rainha_aux, di
 	inc si						;Avança para ver se existe próxima letra E/O
@@ -250,8 +252,7 @@ colisao_detectada:
 	cmp dh, al				;Se der 0 é porque o x é o mesmo, colisão certa
 	je mensagem_colisao		;Pula para avisar qual rainha/linha deu erro
 	jmp jump_colisao
-
-
+;-----------------------------------------------------------------------
 ;MOVIMENTA SUL
 movimento_sul:
 	mov id_rainha_aux, di
@@ -300,19 +301,296 @@ colisao_detectada_sul:
 	cmp dh, al				;Se der 0 é porque o x é o mesmo, colisão certa
 	je mensagem_colisao		;Pula para avisar qual rainha/linha deu erro
 	jmp jump_colisao_sul
-
-
+;---------------------------------------------------------------------------
+;MOVIMENTO OESTE
 movimento_oeste:
-
+	mov id_rainha_aux, di
+	inc si						;Avança para ver se existe próxima letra E/O
+	mov al, [si]				;Salva o índice atual em al
+	
+	lea bx, x_positions
+	mov dh, [bx + di]
+	lea bx, y_positions			;Bota em bx o índice 0 do vetor y
+	mov dl, [bx + di]			;Carrega em DL o Y da rainha atual
+	mov cx, 0					;
+	mov cl, qtdmovimentos		;Salva em CX quantas casas devem ser percorridas
+	lea bx, y_positions			;Move para bx o índice base do y_positions
+	
+loop_oeste:
+	dec dh					;Diminui a posição atual de X, indo para o oeste
+	mov di, 0				;Zera di
+	mov contador_loop, 10	;Deixa contador com 10
+	
+;Loop para verificar a igualdade do Y
+loop_verifica_oeste:
+	cmp dl, [bx + di]
+	je colisao_detectada_oeste	;Pula para o tratamento de colisão
+	
+jump_colisao_oeste:
+	inc di						;Próximo índice
+	dec contador_loop			;Decrementa contador
+	jne loop_verifica_oeste		;Se não for igual, itera o vetor novamente
+	
+	;Se não há colisão, segue o jogo
+	loop loop_oeste		;Continua o loop, decrementando até que cx (qtd movimento) chegue a 0
+	
+	;Atualiza a posição final após o movimento no vetor
+	lea bx, x_positions		;Carrega o y_positions em bx
+	mov di, id_rainha_aux
+	mov [bx + di], dh		;Salva a posição final em bx
+	jmp fim_movimento		;Termina a movimentação
+	
+colisao_detectada_oeste:
+	;Lógica para lidar com a colisão
+	lea bx, x_positions
+	mov al, [bx + di]		;Movendo para AL o x da rainha que estou decrementado
+	cmp dh, al				;Se der 0 é porque o x é o mesmo, colisão certa
+	je mensagem_colisao		;Pula para avisar qual rainha/linha deu erro
+	jmp jump_colisao_oeste
+;------------------------------------------------------------------
+;MOVIMENTO LESTE
 movimento_leste:
-
+	mov id_rainha_aux, di
+	inc si						;Avança para ver se existe próxima letra E/O
+	mov al, [si]				;Salva o índice atual em al
+	
+	lea bx, x_positions
+	mov dh, [bx + di]
+	lea bx, y_positions			;Bota em bx o índice 0 do vetor y
+	mov dl, [bx + di]			;Carrega em DL o Y da rainha atual
+	mov cx, 0					;
+	mov cl, qtdmovimentos		;Salva em CX quantas casas devem ser percorridas
+	lea bx, y_positions			;Move para bx o índice base do y_positions
+	
+loop_leste:
+	inc dh					;Diminui a posição atual de X, indo para o oeste
+	mov di, 0				;Zera di
+	mov contador_loop, 10	;Deixa contador com 10
+	
+;Loop para verificar a igualdade do Y
+loop_verifica_leste:
+	cmp dl, [bx + di]
+	je colisao_detectada_leste	;Pula para o tratamento de colisão
+	
+jump_colisao_leste:
+	inc di						;Próximo índice
+	dec contador_loop			;Decrementa contador
+	jne loop_verifica_leste		;Se não for igual, itera o vetor novamente
+	
+	;Se não há colisão, segue o jogo
+	loop loop_leste		;Continua o loop, decrementando até que cx (qtd movimento) chegue a 0
+	
+	;Atualiza a posição final após o movimento no vetor
+	lea bx, x_positions		;Carrega o y_positions em bx
+	mov di, id_rainha_aux
+	mov [bx + di], dh		;Salva a posição final em bx
+	jmp fim_movimento		;Termina a movimentação
+	
+colisao_detectada_leste:
+	;Lógica para lidar com a colisão
+	lea bx, x_positions
+	mov al, [bx + di]		;Movendo para AL o x da rainha que estou decrementado
+	cmp dh, al				;Se der 0 é porque o x é o mesmo, colisão certa
+	je mensagem_colisao		;Pula para avisar qual rainha/linha deu erro
+	jmp jump_colisao_leste
+;----------------------------------------------------------------
+;MOVIMENTO NORDESTE
 movimento_nordeste:
-
-movimento_noroeste:
-
+	mov id_rainha_aux, di
+	inc si						;Avança para ver se existe próxima letra E/O
+	mov al, [si]				;Salva o índice atual em al
+	
+	lea bx, x_positions
+	mov dh, [bx + di]
+	lea bx, y_positions			;Bota em bx o índice 0 do vetor y
+	mov dl, [bx + di]			;Carrega em DL o Y da rainha atual
+	mov cx, 0					;
+	mov cl, qtdmovimentos		;Salva em CX quantas casas devem ser percorridas
+	lea bx, y_positions			;Move para bx o índice base do y_positions
+	
+loop_nordeste:
+	inc dl					;Incrementa Y
+	inc dh					;Incrementa X
+	mov di, 0				;Zera di
+	mov contador_loop, 10	;Deixa contador com 10
+	
+;Loop para verificar a igualdade do Y
+loop_verifica_nordeste:
+	cmp dl, [bx + di]
+	je colisao_detectada_nordeste	;Pula para o tratamento de colisão
+	
+jump_colisao_nordeste:
+	inc di						;Próximo índice
+	dec contador_loop			;Decrementa contador
+	jne loop_verifica_nordeste		;Se não for igual, itera o vetor novamente
+	
+	;Se não há colisão, segue o jogo
+	loop loop_nordeste		;Continua o loop, decrementando até que cx (qtd movimento) chegue a 0
+	
+	;Atualiza a posição final após o movimento no vetor
+	lea bx, x_positions		;Carrega o y_positions em bx
+	mov di, id_rainha_aux
+	mov [bx + di], dh		;Salva a posição final em bx
+	lea bx, y_positions
+	mov [bx + di], dl
+	jmp fim_movimento		;Termina a movimentação
+	
+colisao_detectada_nordeste:
+	;Lógica para lidar com a colisão
+	lea bx, x_positions
+	mov al, [bx + di]		;Movendo para AL o x da rainha que estou decrementado
+	cmp dh, al				;Se der 0 é porque o x é o mesmo, colisão certa
+	je mensagem_colisao		;Pula para avisar qual rainha/linha deu erro
+	jmp jump_colisao_nordeste
+;------------------------------------------------------------
+;MOVIMENTO NOROESTE
+movimento_noroeste:				;NOROESTE
+	mov id_rainha_aux, di
+	inc si						;Avança para ver se existe próxima letra E/O
+	mov al, [si]				;Salva o índice atual em al
+	
+	lea bx, x_positions			
+	mov dh, [bx + di]
+	lea bx, y_positions			;Bota em bx o índice 0 do vetor y
+	mov dl, [bx + di]			;Carrega em DL o Y da rainha atual
+	mov cx, 0					;
+	mov cl, qtdmovimentos		;Salva em CX quantas casas devem ser percorridas
+	lea bx, y_positions			;Move para bx o índice base do y_positions
+	
+loop_noroeste:
+	inc dl					;Incrementa Y
+	dec dh					;Incrementa X
+	mov di, 0				;Zera di
+	mov contador_loop, 10	;Deixa contador com 10
+	
+;Loop para verificar a igualdade do Y
+loop_verifica_noroeste:
+	cmp dl, [bx + di]
+	je colisao_detectada_noroeste	;Pula para o tratamento de colisão
+	
+jump_colisao_noroeste:
+	inc di						;Próximo índice
+	dec contador_loop			;Decrementa contador
+	jne loop_verifica_noroeste	;Se não for igual, itera o vetor novamente
+	
+	;Se não há colisão, segue o jogo
+	loop loop_noroeste		;Continua o loop, decrementando até que cx (qtd movimento) chegue a 0
+	
+	;Atualiza a posição final após o movimento no vetor
+	lea bx, x_positions		;Carrega o y_positions em bx
+	mov di, id_rainha_aux
+	mov [bx + di], dh		;Salva a posição final em bx
+	lea bx, y_positions
+	mov [bx + di], dl
+	jmp fim_movimento		;Termina a movimentação
+	
+colisao_detectada_noroeste:
+	;Lógica para lidar com a colisão
+	lea bx, x_positions
+	mov al, [bx + di]		;Movendo para AL o x da rainha que estou decrementado
+	cmp dh, al				;Se der 0 é porque o x é o mesmo, colisão certa
+	je mensagem_colisao		;Pula para avisar qual rainha/linha deu erro
+	jmp jump_colisao_noroeste
+;---------------------------------------------------------
+;MOVIMENTO SUDESTE
 movimento_sudeste:
-
+	mov id_rainha_aux, di
+	inc si						;Avança para ver se existe próxima letra E/O
+	mov al, [si]				;Salva o índice atual em al
+	
+	lea bx, x_positions			
+	mov dh, [bx + di]
+	lea bx, y_positions			;Bota em bx o índice 0 do vetor y
+	mov dl, [bx + di]			;Carrega em DL o Y da rainha atual
+	mov cx, 0					;
+	mov cl, qtdmovimentos		;Salva em CX quantas casas devem ser percorridas
+	lea bx, y_positions			;Move para bx o índice base do y_positions
+	
+loop_sudeste:
+	dec dl					;Incrementa Y
+	inc dh					;Incrementa X
+	mov di, 0				;Zera di
+	mov contador_loop, 10	;Deixa contador com 10
+	
+;Loop para verificar a igualdade do Y
+loop_verifica_sudeste:
+	cmp dl, [bx + di]
+	je colisao_detectada_sudeste	;Pula para o tratamento de colisão
+	
+jump_colisao_sudeste:
+	inc di						;Próximo índice
+	dec contador_loop			;Decrementa contador
+	jne loop_verifica_sudeste	;Se não for igual, itera o vetor novamente
+	
+	;Se não há colisão, segue o jogo
+	loop loop_sudeste		;Continua o loop, decrementando até que cx (qtd movimento) chegue a 0
+	
+	;Atualiza a posição final após o movimento no vetor
+	lea bx, x_positions		;Carrega o y_positions em bx
+	mov di, id_rainha_aux
+	mov [bx + di], dh		;Salva a posição final em bx
+	lea bx, y_positions
+	mov [bx + di], dl
+	jmp fim_movimento		;Termina a movimentação
+	
+colisao_detectada_sudeste:
+	;Lógica para lidar com a colisão
+	lea bx, x_positions
+	mov al, [bx + di]		;Movendo para AL o x da rainha que estou decrementado
+	cmp dh, al				;Se der 0 é porque o x é o mesmo, colisão certa
+	je mensagem_colisao		;Pula para avisar qual rainha/linha deu erro
+	jmp jump_colisao_sudeste
+;--------------------------------------------------------
+;MOVIMENTO SUDOESTE
 movimento_sudoeste:
+	mov id_rainha_aux, di
+	inc si						;Avança para ver se existe próxima letra E/O
+	mov al, [si]				;Salva o índice atual em al
+	
+	lea bx, x_positions			
+	mov dh, [bx + di]
+	lea bx, y_positions			;Bota em bx o índice 0 do vetor y
+	mov dl, [bx + di]			;Carrega em DL o Y da rainha atual
+	mov cx, 0					;
+	mov cl, qtdmovimentos		;Salva em CX quantas casas devem ser percorridas
+	lea bx, y_positions			;Move para bx o índice base do y_positions
+	
+loop_sudoeste:
+	dec dl					;Incrementa Y
+	dec dh					;Incrementa X
+	mov di, 0				;Zera di
+	mov contador_loop, 10	;Deixa contador com 10
+	
+;Loop para verificar a igualdade do Y
+loop_verifica_sudoeste:
+	cmp dl, [bx + di]
+	je colisao_detectada_sudeste	;Pula para o tratamento de colisão
+	
+jump_colisao_sudoeste:
+	inc di						;Próximo índice
+	dec contador_loop			;Decrementa contador
+	jne loop_verifica_sudoeste	;Se não for igual, itera o vetor novamente
+	
+	;Se não há colisão, segue o jogo
+	loop loop_sudeste		;Continua o loop, decrementando até que cx (qtd movimento) chegue a 0
+	
+	;Atualiza a posição final após o movimento no vetor
+	lea bx, x_positions		;Carrega o y_positions em bx
+	mov di, id_rainha_aux
+	mov [bx + di], dh		;Salva a posição final em bx
+	lea bx, y_positions
+	mov [bx + di], dl
+	jmp fim_movimento		;Termina a movimentação
+	
+colisao_detectada_sudoeste:
+	;Lógica para lidar com a colisão
+	lea bx, x_positions
+	mov al, [bx + di]		;Movendo para AL o x da rainha que estou decrementado
+	cmp dh, al				;Se der 0 é porque o x é o mesmo, colisão certa
+	je mensagem_colisao		;Pula para avisar qual rainha/linha deu erro
+	jmp jump_colisao_sudoeste
+;----------------------------------------------------------------------------
+
 
 mensagem_colisao:
 	;Exibindo a mensagem de colisão	
@@ -377,18 +655,91 @@ erro_id:
 	int 21h						;Interrupção para exibir o Erro
 	jmp fim_programa
 
-		
+
+	
+
+	
 fim_programa:
+
+imprimindo_posicoes_finais:
+	mov cx, 10
+	mov si, 0
+	
+	lea dx, posicaofinal
+	mov ah, 09h
+	int 21h
+	
+	
+	
+loop_posicoes_finais:
+
+	mov dl, 13
+	mov ah, 02h
+	int 21h
+	mov dl, 10
+	mov ah, 02h
+	int 21h
+	
+	lea dx, msgbloqueio1
+	mov ah, 09h
+	int 21h
+	
+	mov dx, si
+	add dl, '0'
+	mov ah, 02h
+	int 21h
+	
+	mov dl, "("
+	mov ah, 02h					
+	int 21h			
+	
+	
+	
+	
+	
+	
+	
+	lea bx, x_positions
+
+	mov dl, [bx + si]
+	add dl, '0'
+	mov ah, 02h
+	int 21h
+	mov dl, ','
+	mov ah, 02h
+	int 21h
+	lea bx, y_positions
+
+	mov dl, [bx + si]
+	add dl, '0'
+	mov ah, 02h
+	int 21h
+	mov dl, ")"
+	mov ah, 02h					
+	int 21h	
+	inc si
+	loop loop_posicoes_finais
+	
+	
+	
+
+
+
+
+
+
+
+
     ; Fechar o arquivo (certifique-se de que BX ainda contém o handle do arquivo)
     mov ah, 3Eh         ; Função para fechar arquivo
     int 21h             ; Interrupção DOS para fechar arquivo
 	lea bx, y_positions
-	mov cl, [bx+2]	
+	mov cl, [bx+7]	
 	lea bx, x_positions
-	mov ch, [bx+2]
+	mov ch, [bx+7]
 	
 	;mov dl, qtdmovimentos
-	mov dl, linha_atual
+	;mov dl, linha_atual
 	;Encerra programa
     mov ah, 4Ch         ; Função para terminar programa
     int 21h             ; Interrupção DOS para encerrar programa
