@@ -89,61 +89,61 @@ percorrendo_buffer:
 	jz lendo_linha_movimento	;Manda para a leitura de linha de movimento
 	cmp al, 10					;Compara com \n
 	je incrementa_linha
-							;Avançar índice
+							
 volta_loop_buffer:
-	inc si
+	inc si						;Avançar índice
 	loop percorrendo_buffer		;Faz o loop para continuar lendo
 	jmp fim_programa			;Terminar a leitura
 	
 incrementa_linha:
-	inc linha_atual
-	cmp linha_atual, 10
-	je incrementa_linha2
-	jmp volta_loop_buffer
+	inc linha_atual				;Incrementa o contador da linha atual
+	cmp linha_atual, 10			;Compara com 10 para ver se extrapola o dígito
+	je incrementa_linha2		;Se extrapolar, manda para o dígito 2
+	jmp volta_loop_buffer		;Faz de novo o loop
 
 incrementa_linha2:
-	inc linha_atual2
-	mov linha_atual, 0
-	jmp volta_loop_buffer
+	inc linha_atual2			;Incrementa o contador para o segundo dígito da linha atual
+	mov linha_atual, 0			;Zera a linha atual para ficar apenas a secundária
+	jmp volta_loop_buffer		;Repete o loop
 
+;--------------------------------------------------------------
 ;POSIÇÃO INICIAL/IDENTIFICAÇÃO
 lendo_linha_inicial:
 	
-	lea dx, msgok	;Carrega a mensagem de ID inválido
-	mov ah, 09h		;Função para exibir string
-	int 21h			
+	;lea dx, msgok	;Carrega a mensagem de ID inválido
+	;mov ah, 09h		;Função para exibir string
+	;int 21h			
 	
 	add si, 2		;Bota 2 no SI para pegar o índice 2
 	mov al, [si] 	;Ler o ID da rainha, assumindo que está no índice 2
     sub al, "0" 	;Converter de ASCII para valor numérico
 
 	;Verifica se o ID da rainha é um número entre 0 e 9 
-	;cmp al, 0 			;Compara o valor atual com 0
-	;jl erro_id			;Se for menor que 0, pula para erro ID
-	;cmp al, 9			;Compara o valor atual com 9
-	;jg erro_id			;Se for maior do que 9, pula para erro ID
+	cmp al, 0 			;Compara o valor atual com 0
+	jl erro_id			;Se for menor que 0, pula para erro ID
+	cmp al, 9			;Compara o valor atual com 9
+	jg erro_id			;Se for maior do que 9, pula para erro ID
    
     mov id_rainha, al  	;Armazenar o ID da rainha em id_rainha
 	mov ah, 0			;0 na parte "alta de ah para fazer ax"
 	mov di, ax			;Salva o ID rainha em di
 	
 	add si, 2			;Soma dois no si
-	mov ax, 0
+	mov ax, 0			;Zera ax
 
 ;Lendo a coordenada X
 loop_leX: 
 	mul dez
-	add al, [si]	;Pegando o primeiro dígito de x, assumindo que ele está no índice 2
-	sub al, "0"		;Transformar de ASCII
-	inc si			;Avança um índice
-	mov dl, [si]	;Salva o índice em dl
-	cmp dl, ","		;Compara dl com vírgula
-	jnz loop_leX	;Se não for igual, faz o loop
+	add al, [si]			;Pegando o primeiro dígito de x, assumindo que ele está no índice 2
+	sub al, "0"				;Transformar de ASCII
+	inc si					;Avança um índice
+	mov dl, [si]			;Salva o índice em dl
+	cmp dl, ","				;Compara dl com vírgula
+	jnz loop_leX			;Se não for igual, faz o loop
 	lea bx, x_positions		;Salva o índice base em bx
-	mov [bx+di], al			;Salva x no índice atual da rainha
-		
-	inc si
-	mov ax, 0
+	mov [bx+di], al			;Salva x no índice atual da rainha	
+	inc si					;Avança si
+	mov ax, 0				;Zera ax
 
 ;Lendo a coordenada Y
 loop_leY:		
@@ -158,12 +158,11 @@ loop_leY:
 	mov [bx+di], al		;Salva o y no índice atual do vetor y
 	
 	jmp percorrendo_buffer
-
-;MOVIMENTAÇÃO
-
+;-------------------------------------------------------------
+;LINHA DE MOVIMENTAÇÃO
 lendo_linha_movimento:
 	;Ler o ID da rainha, assumindo que está no índice 2
-	add si, 2		;Índice 2
+	add si, 2		;Índice 2 no si
 	mov al, [si] 	;Salva o índice atual em al
     sub al, "0" 	;Converter de ASCII para valor numérico
 	
@@ -178,17 +177,17 @@ lendo_linha_movimento:
 	mov di, ax			;Move o id_rainha para di
 	
 	add si, 2			;Índice recebe 2
-	mov ax, 0			
+	mov ax, 0			;Zera ax
 	
 ;Quantidade de casas que serão movidas
 loop_distancia: 
 	mul dez
-	add al, [si]		;Pegando a quantidade de casas que será movida
-	sub al, "0"			;Converte ASCII
-	inc si				;Próximo índice
-	mov dl, [si]		;Salva índice em dl
-	cmp dl, ","			;Compara com vírgula
-	jnz loop_distancia	;Se não for igual, faz de novo
+	add al, [si]			;Pegando a quantidade de casas que será movida
+	sub al, "0"				;Converte ASCII
+	inc si					;Próximo índice
+	mov dl, [si]			;Salva índice em dl
+	cmp dl, ","				;Compara com vírgula
+	jnz loop_distancia		;Se não for igual, faz de novo
 	mov qtdmovimentos, al	;Salva a quantidade que deverá ser movimentada em qtdmovimentos
 	
 ;Direção de movimento que será percorrida
@@ -218,7 +217,7 @@ movimento_norte:
 	mov dh, [bx + di]
 	lea bx, y_positions			;Bota em bx o índice 0 do vetor y
 	mov dl, [bx + di]			;Carrega em DL o Y da rainha atual
-	mov cx, 0					;
+	mov cx, 0					;0 no cx
 	mov cl, qtdmovimentos		;Salva em CX quantas casas devem ser percorridas
 	lea bx, y_positions			;Move para bx o índice base do y_positions
 	
@@ -229,7 +228,7 @@ loop_norte:
 	
 ;Loop para verificar a igualdade do Y
 loop_verifica:
-	cmp dl, [bx + di]
+	cmp dl, [bx + di]		;Compara para ver se o y atual é igual e gera colisão
 	je colisao_detectada	;Pula para o tratamento de colisão
 jump_colisao:
 	inc di					;Próximo índice
@@ -241,13 +240,13 @@ jump_colisao:
 	
 	;Atualiza a posição final após o movimento no vetor
 	lea bx, y_positions		;Carrega o y_positions em bx
-	mov di, id_rainha_aux
+	mov di, id_rainha_aux	;Bota o id_rainha em di
 	mov [bx + di], dl		;Salva a posição final em bx
 	jmp fim_movimento		;Termina a movimentação
 	
 colisao_detectada:
 	;Lógica para lidar com a colisão
-	lea bx, x_positions
+	lea bx, x_positions		;Endereço base do vetor em bx
 	mov al, [bx + di]		;Movendo para AL o x da rainha que estou decrementado
 	cmp dh, al				;Se der 0 é porque o x é o mesmo, colisão certa
 	je mensagem_colisao		;Pula para avisar qual rainha/linha deu erro
@@ -263,11 +262,11 @@ movimento_sul:
 	cmp al, "O"					;Se for igual a "O", é porque existe +"oeste"
 	je movimento_sudoeste		;Verifica se é para o noroeste
 	
-	lea bx, x_positions
-	mov dh, [bx + di]
+	lea bx, x_positions			;Endereço base de x_positions
+	mov dh, [bx + di]			;Move o atual em dh
 	lea bx, y_positions			;Bota em bx o índice 0 do vetor y
 	mov dl, [bx + di]			;Carrega em DL o Y da rainha atual
-	mov cx, 0					;
+	mov cx, 0					;Zera cx
 	mov cl, qtdmovimentos		;Salva em CX quantas casas devem ser percorridas
 	lea bx, y_positions			;Move para bx o índice base do y_positions
 	
@@ -290,7 +289,7 @@ jump_colisao_sul:
 	
 	;Atualiza a posição final após o movimento no vetor
 	lea bx, y_positions		;Carrega o y_positions em bx
-	mov di, id_rainha_aux
+	mov di, id_rainha_aux	;Id rainha em di
 	mov [bx + di], dl		;Salva a posição final em bx
 	jmp fim_movimento		;Termina a movimentação
 	
@@ -312,7 +311,7 @@ movimento_oeste:
 	mov dh, [bx + di]
 	lea bx, y_positions			;Bota em bx o índice 0 do vetor y
 	mov dl, [bx + di]			;Carrega em DL o Y da rainha atual
-	mov cx, 0					;
+	mov cx, 0					
 	mov cl, qtdmovimentos		;Salva em CX quantas casas devem ser percorridas
 	lea bx, y_positions			;Move para bx o índice base do y_positions
 	
@@ -358,7 +357,7 @@ movimento_leste:
 	mov dh, [bx + di]
 	lea bx, y_positions			;Bota em bx o índice 0 do vetor y
 	mov dl, [bx + di]			;Carrega em DL o Y da rainha atual
-	mov cx, 0					;
+	mov cx, 0					
 	mov cl, qtdmovimentos		;Salva em CX quantas casas devem ser percorridas
 	lea bx, y_positions			;Move para bx o índice base do y_positions
 	
@@ -404,7 +403,7 @@ movimento_nordeste:
 	mov dh, [bx + di]
 	lea bx, y_positions			;Bota em bx o índice 0 do vetor y
 	mov dl, [bx + di]			;Carrega em DL o Y da rainha atual
-	mov cx, 0					;
+	mov cx, 0					
 	mov cl, qtdmovimentos		;Salva em CX quantas casas devem ser percorridas
 	lea bx, y_positions			;Move para bx o índice base do y_positions
 	
@@ -601,35 +600,44 @@ mensagem_colisao:
 	mov ah, 02h
 	int 21h
 	
+	;Exibindo o caractere '['
 	mov dl, "["
 	mov ah, 02h					
-	int 21h						
+	int 21h	
+	;Exibindo o número da linha atual(2) 
 	mov dl, linha_atual2
 	add dl, "0"
 	mov ah, 02h
 	int 21h
 	
+	;Exibindo o número da linha atual
 	mov dl, linha_atual
 	add dl, "0"
 	mov ah, 02h
 	int 21h
 	
+	;Exibindo o caractere ']'
 	mov dl, "]"
 	mov ah, 02h					
 	int 21h	
 	
+	;Exibindo "Rainha" e o número da rainha
 	lea dx, msgbloqueio1
 	mov ah, 09h
 	int 21h
+	
+	;Id da rainha que foi bloqueada
 	mov dx, id_rainha_aux
 	add dx, '0'
 	mov ah, 02h
 	int 21h
 	
+	;Segunda parte da mensagem de bloqueio
 	lea dx, msgbloqueio2
 	mov ah, 09h
 	int 21h
 	
+	;Exibindo ID da rainha que bloqueou o caminho
 	mov dx, di
 	add dx, '0'
 	mov ah, 02h
@@ -656,23 +664,20 @@ erro_id:
 	jmp fim_programa
 
 
-	
-
-	
 fim_programa:
 
 imprimindo_posicoes_finais:
+	;Preparando o loop
 	mov cx, 10
 	mov si, 0
-	
+	;Carrega string
 	lea dx, posicaofinal
 	mov ah, 09h
 	int 21h
 	
 	
-	
+;Impressão das posições finais
 loop_posicoes_finais:
-
 	mov dl, 13
 	mov ah, 02h
 	int 21h
@@ -680,55 +685,53 @@ loop_posicoes_finais:
 	mov ah, 02h
 	int 21h
 	
+	;Mensagem "Rainha"
 	lea dx, msgbloqueio1
 	mov ah, 09h
 	int 21h
 	
+	;Id atual que será mostrado
 	mov dx, si
 	add dl, '0'
 	mov ah, 02h
 	int 21h
 	
+	;Parenteses de formatação
 	mov dl, "("
 	mov ah, 02h					
 	int 21h			
 	
 	
+	lea bx, x_positions				;Carrega o endereço do vetor x_positions em bx
 	
-	
-	
-	
-	
-	lea bx, x_positions
-
+	;Exibindo a coordenada X atual
 	mov dl, [bx + si]
 	add dl, '0'
 	mov ah, 02h
 	int 21h
+	
+	;Separando as coordenadas por vírgula
 	mov dl, ','
 	mov ah, 02h
 	int 21h
-	lea bx, y_positions
+	
+	lea bx, y_positions				;Carrega o endereço do vetor y_positions em bx
 
+	;Exibindo a coordenada y atual
 	mov dl, [bx + si]
 	add dl, '0'
 	mov ah, 02h
 	int 21h
+	
+	;Fecha parenteses de formatação
 	mov dl, ")"
 	mov ah, 02h					
-	int 21h	
+	int 21h
+	
+	;Incrementa e faz de novo
 	inc si
 	loop loop_posicoes_finais
 	
-	
-	
-
-
-
-
-
-
-
 
     ; Fechar o arquivo (certifique-se de que BX ainda contém o handle do arquivo)
     mov ah, 3Eh         ; Função para fechar arquivo
