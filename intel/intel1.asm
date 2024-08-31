@@ -10,9 +10,10 @@
 ; Declarando as variáveis e o buffers
 .data
     ArquivoLido db 'in.txt',0
-    msgerroposicao db 'Posicao inicial invalida!',13,10,'$'
+    msgerroposicaox db 'Posicao inicial X invalida!',13,10,'$'
+	msgerroposicaoy db 'Posicao inicial Y invalida!',13,10,'$'
     msgerroabertura db 'Erro ao abrir arquivo!',13,10,'$'
-	msgerroidrainha db 'Identificador de rainha invalido, deve ser um valor entre 0 e 9!',13,10,'$'
+	msgerroidrainha db 'Identificador de rainha invalido',13,10,'$'
 	posicaofinal db 'Posicao final $'
 	msgbloqueio1 db ' Rainha $'
 	msgbloqueio2 db ' bloqueada pela rainha $'
@@ -113,7 +114,7 @@ lendo_linha_inicial:
 	;lea dx, msgok	;Carrega a mensagem de ID inválido
 	;mov ah, 09h		;Função para exibir string
 	;int 21h			
-	
+	;mov si, 0
 	add si, 2		;Bota 2 no SI para pegar o índice 2
 	mov al, [si] 	;Ler o ID da rainha, assumindo que está no índice 2
     sub al, "0" 	;Converter de ASCII para valor numérico
@@ -128,6 +129,11 @@ lendo_linha_inicial:
 	mov ah, 0			;0 na parte "alta de ah para fazer ax"
 	mov di, ax			;Salva o ID rainha em di
 	
+	;cmp al, 0 			;Compara o valor atual com 0
+	;jl erro_id			;Se for menor que 0, pula para erro ID
+	;cmp al, 9			;Compara o valor atual com 9
+	;jg erro_id			;Se for maior do que 9, pula para erro ID
+	
 	add si, 2			;Soma dois no si
 	mov ax, 0			;Zera ax
 
@@ -141,7 +147,9 @@ loop_leX:
 	cmp dl, ","				;Compara dl com vírgula
 	jnz loop_leX			;Se não for igual, faz o loop
 	lea bx, x_positions		;Salva o índice base em bx
-	mov [bx+di], al			;Salva x no índice atual da rainha	
+	mov [bx+di], al			;Salva x no índice atual da rainha
+	cmp ax, 63
+	jg erro_coordenada_x_invalida
 	inc si					;Avança si
 	mov ax, 0				;Zera ax
 
@@ -156,6 +164,8 @@ loop_leY:
 	jnz loop_leY		;Repete o loop caso a condição
 	lea bx, y_positions	;Salva a base do y_positions em bx
 	mov [bx+di], al		;Salva o y no índice atual do vetor y
+	cmp ax, 63
+	jg erro_coordenada_y_invalida
 	
 	jmp percorrendo_buffer
 ;-------------------------------------------------------------
@@ -167,15 +177,15 @@ lendo_linha_movimento:
     sub al, "0" 	;Converter de ASCII para valor numérico
 	
 	;Verifica se o ID da rainha é um número entre 0 e 9   (NÃO FUNCIONA PARA DOIS DÍGITOS)
-	cmp al, 0 	;Compara o valor atual com 0
-	jl erro_id	;Se for menor que 0, pula para erro ID
-	cmp al, 9	;Compara o valor atual com 9
-	jg erro_id	;Se for maior do que 9, pula para erro ID
+	;cmp al, 0 	;Compara o valor atual com 0
+	;jg erro_id	;Se for menor que 0, pula para erro ID
+	;cmp al, 9	;Compara o valor atual com 9
+	;jns erro_id	;Se for maior do que 9, pula para erro ID
    
     mov id_rainha, al   ;Armazenar o ID da rainha em id_rainha
 	mov ah, 0			;Preenche o registrador
 	mov di, ax			;Move o id_rainha para di
-	
+		
 	add si, 2			;Índice recebe 2
 	mov ax, 0			;Zera ax
 	
@@ -657,6 +667,22 @@ erro_abertura:
    jmp fim_programa
 
 erro_id:
+	;Exibindo o caractere '['
+	mov dl, "["
+	mov ah, 02h					
+	int 21h	
+
+	;Exibindo o número da linha atual
+	mov dl, linha_atual
+	add dl, "0"
+	mov ah, 02h
+	int 21h
+
+	;Exibindo o caractere ']'
+	mov dl, "]"
+	mov ah, 02h					
+	int 21h	
+
 	;Exibir mensagem de erro para ID inválido
 	lea dx, msgerroidrainha		;Carrega a mensagem de ID inválido
 	mov ah, 09h					;Função para exibir string
@@ -664,6 +690,63 @@ erro_id:
 	jmp fim_programa
 
 
+erro_mesma_coordenada:
+
+erro_saiu_tabuleiro:
+
+erro_movimento_invalido:
+
+erro_coordenada_x_invalida:
+	;Exibindo o caractere '['
+	mov dl, "["
+	mov ah, 02h					
+	int 21h	
+
+	;Exibindo o número da linha atual
+	mov dl, linha_atual
+	add dl, "0"
+	mov ah, 02h
+	int 21h
+
+	;Exibindo o caractere ']'
+	mov dl, "]"
+	mov ah, 02h					
+	int 21h	
+
+	;Exibir mensagem de erro para posição invalida
+	lea dx, msgerroposicaox	;Carrega a mensagem de ID inválido
+	mov ah, 09h					;Função para exibir string
+	int 21h						;Interrupção para exibir o Erro
+	jmp fim_definitivo
+	
+erro_coordenada_y_invalida:
+	;Exibindo o caractere '['
+	mov dl, "["
+	mov ah, 02h					
+	int 21h	
+
+	;Exibindo o número da linha atual
+	mov dl, linha_atual
+	add dl, "0"
+	mov ah, 02h
+	int 21h
+
+	;Exibindo o caractere ']'
+	mov dl, "]"
+	mov ah, 02h					
+	int 21h	
+
+	;Exibir mensagem de erro para posição invalida
+	lea dx, msgerroposicaoy	;Carrega a mensagem de ID inválido
+	mov ah, 09h					;Função para exibir string
+	int 21h						;Interrupção para exibir o Erro
+	jmp fim_definitivo
+	
+
+
+;NÃO ESTÁ SALVANDO DOIS DÍGITOS NA NOVA COORDENADA
+
+;ATOS FINAIS
 fim_programa:
 
 imprimindo_posicoes_finais:
@@ -732,7 +815,7 @@ loop_posicoes_finais:
 	inc si
 	loop loop_posicoes_finais
 	
-
+fim_definitivo:
     ; Fechar o arquivo (certifique-se de que BX ainda contém o handle do arquivo)
     mov ah, 3Eh         ; Função para fechar arquivo
     int 21h             ; Interrupção DOS para fechar arquivo
@@ -742,7 +825,7 @@ loop_posicoes_finais:
 	mov ch, [bx+7]
 	
 	;mov dl, qtdmovimentos
-	;mov dl, linha_atual
+	mov dl, al
 	;Encerra programa
     mov ah, 4Ch         ; Função para terminar programa
     int 21h             ; Interrupção DOS para encerrar programa
