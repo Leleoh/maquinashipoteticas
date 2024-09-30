@@ -1,5 +1,5 @@
 ;==============================================================
-;Intel 24/1 - Leonel Hernandez - 585121 - Professor Sérgio
+;Intel 24/1 - Leonel Hernandez - Professor Sérgio
 ;==============================================================
 
 ; Definindo o modelo de memória (small)
